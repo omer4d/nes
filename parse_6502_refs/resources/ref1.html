@@ -1,0 +1,3048 @@
+<html>
+<!--
+
+NOTE - Due to a bug in IE55 (who knows or cares if it exists in higher versions)
+any use of the /PRE, appends "&bnsp;<br>" to your preformatted text
+(M$ really are a team of grade A programmers aren't they?)
+...which means that LOADS and LOADS of formatting work I did to make this document
+sexy will be ignored by IE
+
+USE OPERA  .... WWW.OPERA.COM
+
+Nothing new, just old news repackaged
+...this is how I learn a new processor
+...Once written; never forgotten
+
+If you find it helpful then great,
+if not erase it and let us never speak of such travesty again.
+
+If you find problems with it, typos, errors, whatever,
+I'd love to hear from you and rest assured it will be corrected.
+
+NB. I produce (as) readable (as it gets) HTML code
+    For formatting reasons I use a tag "<x>";
+    it has never caused me a problem - every browser I know of simply ignores it.
+    If you have a problem with it just do SearcAndReplace "<x>" with ""
+      ...and we'll all will be merry and bright.
+
+JEEZUZ - W3C validator HATES me - LOL
+
+Greetz go out to: runderwo, OzOne, CrowTRobo, Toni Baker
+-->
+
+  <head>
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+
+    <title>6502 Programmers Reference</title>
+  </head>
+
+  <body bgcolor="#000000" text="#FFFFFF" link="#99EE99" vlink="#00FF00" alink="#0000FF">
+
+
+
+
+    <br><A name="DETAIL">&nbsp;</A>
+    <center>
+      <table summary="" width="90%" bgcolor="#8080FF" border="0"><tr><td align="center"><h1><font color="#FFFF00">
+      Detailed Instruction Reference
+      </font></h1></td></tr></table>
+    </center>
+    <br>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="ADC">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>ADC</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       ADC #$A5       $69      2     2   </font>
+  <font color="#FFFF00">Zero Page       ADC $A5        $65      2     3   </font>
+  <font color="#FFFFFF">Zero Page,X     ADC $A5,X      $75      2     4   </font>
+  <font color="#FFFF00">Absolute        ADC $A5B6      $6D      3     4   </font>
+  <font color="#FFFFFF">Absolute,X      ADC $A5B6,X    $7D      3     4+  </font>
+  <font color="#FFFF00">Absolute,Y      ADC $A5B6,Y    $79      3     4+  </font>
+  <font color="#FFFFFF">(Indirect,X)    ADC ($A5,X)    $61      2     6   </font>
+  <font color="#FFFF00">(Indirect),Y    ADC ($A5),Y    $71      2     5+  </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Add Memory to A with Carry</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><b>V</b></A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  t = A + M + P.C
+  P.V = (A.7!=t.7) ? 1:0
+  P.N = A.7
+  P.Z = (t==0) ? 1:0
+  IF (P.D)
+    t = bcd(A) + bcd(M) + P.C
+    P.C = (t>99) ? 1:0
+  ELSE
+    P.C = (t>255) ? 1:0
+  A = t &amp; 0xFF                </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            There is no add-without-carry instruction!
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            As the result of ADC depends on the contents of the <a href="#FLG-C">Carry Flag (P.C)</A>
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When performing "single precision" (or "8 bit") arithmetic it is often necessary to
+            ensure that the <a href="#FLG-C">Carry Flag (P.C)</A> is CLEARed with a <a href="#CLC">CLC</A>
+            command before the ADC is executed ...to ensure that the
+            <a href="#FLG-C">Carry Flag (P.C)</A> has no bearing on the result.
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            CLEARing the <a href="#FLG-C">Carry Flag (P.C)</A> with a <a href="#CLC">CLC</A> command is
+            normally necessary before the first stage of a "multiple precision" (or "more than 8 bit")
+            addition.
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            The action of ADC is dependant on the setting of <a href="#FLG-D">Decimal Flag (P.D)</A><br>
+          </td></tr>
+        </table></td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="AND">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>AND</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       AND #$A5       $29      2     2   </font>
+  <font color="#FFFF00">Zero Page       AND $A5        $25      2     2   </font>
+  <font color="#FFFFFF">Zero Page,X     AND $A5,X      $35      2     3   </font>
+  <font color="#FFFF00">Absolute        AND $A5B6      $2D      3     4   </font>
+  <font color="#FFFFFF">Absolute,X      AND $A5B6,X    $3D      3     4+  </font>
+  <font color="#FFFF00">Absolute,Y      AND $A5B6,Y    $39      3     4+  </font>
+  <font color="#FFFFFF">(Indirect,X)    AND ($A5,X)    $21      2     6   </font>
+  <font color="#FFFF00">(Indirect),Y    AND ($A5),Y    $31      2     5+  </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Bitwise-AND A with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  A = A &amp; M
+  P.N = A.7
+  P.Z = (A==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+<table summary=""><tr>
+  <td>
+    <table summary="" border="1" cellpadding="5">
+      <tr><td bgcolor="#008800"><pre>AND</pre></td><td bgcolor="#008800"><pre> 0 </pre></td><td bgcolor="#008800"><pre> 1 </pre></td></tr>
+      <tr><td bgcolor="#008800"><pre> 0 </pre></td><td bgcolor="#008000"><pre> 0 </pre></td><td bgcolor="#008000"><pre> 0 </pre></td></tr>
+      <tr><td bgcolor="#008800"><pre> 1 </pre></td><td bgcolor="#008000"><pre> 0 </pre></td><td bgcolor="#008000"><pre> 1 </pre></td></tr>
+    </table>
+  </td>
+  <td width="10%"></td>
+  <td>
+    <table summary="" frame="box">
+      <tr>
+        <td><pre> 1 0 1 0 </pre></td>
+        <td rowspan="2"><pre>AND </pre></td>
+      </tr>
+      <tr>
+        <td><pre> 1 1 0 0 </pre></td>
+      </tr>
+      <tr>
+        <td><pre>---------</pre></td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td><pre> 1 0 0 0 </pre></td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </td>
+</tr></table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="ASL">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>ASL</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Accumulator     ASL A          $0A      1     2   </font>
+  <font color="#FFFF00">Zero Page       ASL $A5        $06      2     5   </font>
+  <font color="#FFFFFF">Zero Page,X     ASL $A5,X      $16      2     6   </font>
+  <font color="#FFFF00">Absolute        ASL $A5B6      $0E      3     6   </font>
+  <font color="#FFFFFF">Absolute,X      ASL $A5B6,X    $1E      3     7   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Arithmetic Shift Left</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.C = B.7
+  B = (B << 1) &amp; $FE
+  P.N = B.7
+  P.Z = (B==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+<table summary="" frame="none">
+  <tr>
+    <td><table summary="" frame="box"><tr><td><small>P.C</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.7</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.6</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.5</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.4</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.3</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.2</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.1</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.0</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>0</small></td></tr></table></td> <td><pre>&nbsp;</pre></td>
+  </tr>
+  <tr><td colspan="21"></td></tr>
+  <tr><td colspan="21">
+    <table summary="" align="center" frame="none" bgcolor="#008800">
+      <tr>
+        <td>&nbsp;Before:</td>
+        <td><pre> P.C = <font color="#FFC0FF">?</font>   B = <font color="#FFC0FF">1 1 1 0  1 1 1 0</font> </pre></td>
+      </tr>
+      <tr>
+        <td>&nbsp;After:</td>
+        <td><pre> P.C = <font color="#FFC0FF">0</font>   B = <font color="#FFC0FF">1 1 0 1  1 1 0 0</font> </pre></td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            In my experience, this is NOT an "arithmetic" shift.<br>
+            An Arithmetic shift <i>normally</i> preserves the Most Significant Bit (MSb) or "Sign bit"
+            of the source value.<br>
+            ASL does NOT do this on the 6502.<br>
+            The 6502 places a copy of the sign from the result of a <i>Logical Shift Left</i>
+            into the <a href="#FLG-N">sigN Flag (P.N)</A>
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            This instruction would be better named as SLS (logical Shift Left and update Sign)
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BCC">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BCC</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Relative        BCC $A5        $90      2     2++ </font> </big></pre>
+        <table summary="" align="center">
+          <tr>
+            <td rowspan="2" valign="top"><b><font color="#FFFF00">++</font></b></td>
+            <td><small>Add 1 (one) T-State if a the branch occurs <i>and</i> the destination address is on
+                       the same <a href="#PAGE">Page</a></small></td>
+          </tr><tr>
+            <td><small>Add 2 (two) T-States if a the branch occurs <i>and</i> the destination address is on
+            a different <a href="#PAGE">Page</a></small></td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Branch iff P.C is CLEAR</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  if (P.C == 0) GOTO (PC+M) </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0">
+          <tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#FLG-C">Carry Flag (P.C)</A> gives full details on this flag,
+            including a comprehensive list of instructions which modify its value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            If a branch condition is false the <A href="#FLOW">Program Counter (PC)</A> is not affected and program execution
+            continues at the instruction immediately after the Branch instrucion.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BCS">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BCS</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Relative        BCS $A5        $B0      2     2++ </font> </big></pre>
+        <table summary="" align="center">
+          <tr>
+            <td rowspan="2" valign="top"><b><font color="#FFFF00">++</font></b></td>
+            <td><small>Add 1 (one) T-State if a the branch occurs <i>and</i> the destination address is on
+                       the same <a href="#PAGE">Page</a></small></td>
+          </tr><tr>
+            <td><small>Add 2 (two) T-States if a the branch occurs <i>and</i> the destination address is on
+            a different <a href="#PAGE">Page</a></small></td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Branch iff P.C is SET</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  if (P.C == 1) GOTO (PC+M) </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#FLG-C">Carry Flag (P.C)</A> gives full details on this flag,
+            including a comprehensive list of instructions which modify its value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            If a branch condition is false the <A href="#FLOW">Program Counter (PC)</A> is not affected and program execution
+            continues at the instruction immediately after the Branch instrucion.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BEQ">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BEQ</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Relative        BEQ $A5        $F0      2     2++ </font> </big></pre>
+        <table summary="" align="center">
+          <tr>
+            <td rowspan="2" valign="top"><b><font color="#FFFF00">++</font></b></td>
+            <td><small>Add 1 (one) T-State if a the branch occurs <i>and</i> the destination address is on
+                       the same <a href="#PAGE">Page</a></small></td>
+          </tr><tr>
+            <td><small>Add 2 (two) T-States if a the branch occurs <i>and</i> the destination address is on
+            a different <a href="#PAGE">Page</a></small></td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Branch iff P.Z is SET</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  if (P.Z == 1) GOTO (PC+M) </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#FLG-Z">Zero Flag (P.Z)</A> gives full details on this flag,
+            including a comprehensive list of instructions which modify its value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            If a branch condition is false the <A href="#FLOW">Program Counter (PC)</A> is not affected and program execution
+            continues at the instruction immediately after the Branch instrucion.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BIT">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BIT</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Zero Page       BIT $A5        $24      2     3   </font>
+  <font color="#FFFF00">Absolute        BIT $A5B6      $2C      3     4   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Test bits in A with M</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><b>V</b></A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  t = A &amp; M
+  P.N = t.7
+  P.V = t.6
+  P.Z = (t==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td valign="top">
+            The BIT instuction does NOT affect ANY register values.
+          </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td valign="top">
+            To perform a Branch if a bit-4 is SET:
+          </td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td valign="top">
+<pre>
+  LDA  0001'0000
+  BIT  Mem
+  BNE  lbl       </pre>
+          </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td valign="top">
+            To perform a Branch if a bit-4 is CLEAR:
+          </td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td valign="top">
+<pre>
+  LDA  0001'0000
+  BIT  Mem
+  BEQ  lbl       </pre>
+          </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td valign="top">
+            Care should be taken to ensure that  bits 6 &amp; 7 are the most frequently tested.<br>
+            This way it is not necessary to preload A with the mask.<br><br>
+<table summary="" bgcolor="#008800" border="1">
+<tr><td valign="top">
+<pre><font color="#FFFFFF"> IF (   bPeek(Mem)&amp;(1<<7)  ) GOTO lbl  </font></pre></td>
+<td><pre><font color="#FFFFFF">  BIT  Mem <br>  BMI  lbl  </font></pre>
+</td></tr>
+<tr><td valign="top">
+<pre><font color="#FFFF00"> IF ( !(bPeek(Mem)&amp;(1<<7)) ) GOTO lbl  </font></pre></td>
+<td><pre><font color="#FFFF00">  BIT  Mem <br>  BPL  lbl  </font></pre>
+</td></tr>
+<tr><td valign="top">
+<pre><font color="#FFFFFF"> IF (   bPeek(Mem)&amp;(1<<6)  ) GOTO lbl  </font></pre></td>
+<td><pre><font color="#FFFFFF">  BIT  Mem <br>  BVS  lbl  </font></pre>
+</td></tr>
+<tr><td valign="top">
+<pre><font color="#FFFF00"> IF ( !(bPeek(Mem)&amp;(1<<6)) ) GOTO lbl  </font></pre></td>
+<td><pre><font color="#FFFF00">  BIT  Mem <br>  BVC  lbl  </font></pre>
+</td></tr>
+</table>
+          </td></tr>
+        </table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BMI">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BMI</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Relative        BMI $A5        $30      2     2++ </font> </big></pre>
+        <table summary="" align="center">
+          <tr>
+            <td rowspan="2" valign="top"><b><font color="#FFFF00">++</font></b></td>
+            <td><small>Add 1 (one) T-State if a the branch occurs <i>and</i> the destination address is on
+                       the same <a href="#PAGE">Page</a></small></td>
+          </tr><tr>
+            <td><small>Add 2 (two) T-States if a the branch occurs <i>and</i> the destination address is on
+            a different <a href="#PAGE">Page</a></small></td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Branch iff P.N is SET</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  if (P.N == 1) GOTO (PC+M) </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#FLG-N">sigN Flag (P.N)</A> gives full details on this flag,
+            including a comprehensive list of instructions which modify its value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            If a branch condition is false the <A href="#FLOW">Program Counter (PC)</A> is not affected and program execution
+            continues at the instruction immediately after the Branch instrucion.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BNE">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BNE</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Relative        BNE $A5        $D0      2     2++ </font> </big></pre>
+        <table summary="" align="center">
+          <tr>
+            <td rowspan="2" valign="top"><b><font color="#FFFF00">++</font></b></td>
+            <td><small>Add 1 (one) T-State if a the branch occurs <i>and</i> the destination address is on
+                       the same <a href="#PAGE">Page</a></small></td>
+          </tr><tr>
+            <td><small>Add 2 (two) T-States if a the branch occurs <i>and</i> the destination address is on
+            a different <a href="#PAGE">Page</a></small></td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Branch iff P.Z is CLEAR</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  if (P.Z == 0) GOTO (PC+M) </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#FLG-Z">Zero Flag (P.Z)</A> gives full details on this flag,
+            including a comprehensive list of instructions which modify its value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            If a branch condition is false the <A href="#FLOW">Program Counter (PC)</A> is not affected and program execution
+            continues at the instruction immediately after the Branch instrucion.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BPL">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BPL</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Relative        BPL $A5        $10      2     2++ </font> </big></pre>
+        <table summary="" align="center">
+          <tr>
+            <td rowspan="2" valign="top"><b><font color="#FFFF00">++</font></b></td>
+            <td><small>Add 1 (one) T-State if a the branch occurs <i>and</i> the destination address is on
+                       the same <a href="#PAGE">Page</a></small></td>
+          </tr><tr>
+            <td><small>Add 2 (two) T-States if a the branch occurs <i>and</i> the destination address is on
+            a different <a href="#PAGE">Page</a></small></td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Branch iff P.N is CLEAR</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  if (P.N == 0) GOTO (PC+M) </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#FLG-N">sigN Flag (P.N)</A> gives full details on this flag,
+            including a comprehensive list of instructions which modify its value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            If a branch condition is false the <A href="#FLOW">Program Counter (PC)</A> is not affected and program execution
+            continues at the instruction immediately after the Branch instrucion.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BRK">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BRK</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         BRK            $00      1     7   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Simulate Interrupt ReQuest (IRQ)</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  PC = PC + 1
+  bPoke(SP,PC.h)
+  SP = SP - 1
+  bPoke(SP,PC.l)
+  SP = SP - 1
+  bPoke(SP, (P|$10) )
+  SP = SP - 1
+  l = bPeek($FFFE)
+  h = bPeek($FFFF)<<8
+  PC = h|l             </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            The copy of the <A href="#FLG-B">Break Flag (P.B)</A> in the CPU is NOT changed (remains CLEAR).
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            The copy of the <A href="#FLG-B">Break Flag (P.B)</A> which is placed on the <A href="#STACK">Stack</A> is SET.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            This simulates an <A href="#INT">Interrupt</A> in all but one respect:<br>
+            The Return Address that is placed on the <A href="#STACK">Stack</A>, is incremented by one.<br>
+            This means that the byte following a BRK command will NOT be executed upon Return.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            In the <A href="#INT">Interrupts</A> section, there is code to correct the return
+            address error, but the code is bulky.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            Another solution is to place a <A href="#NOP">NOP</A> after every BRK ...and then
+            forget about this problem.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BVC">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BVC</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Relative        BVC $A5        $50      2     2++ </font> </big></pre>
+        <table summary="" align="center">
+          <tr>
+            <td rowspan="2" valign="top"><b><font color="#FFFF00">++</font></b></td>
+            <td><small>Add 1 (one) T-State if a the branch occurs <i>and</i> the destination address is on
+                       the same <a href="#PAGE">Page</a></small></td>
+          </tr><tr>
+            <td><small>Add 2 (two) T-States if a the branch occurs <i>and</i> the destination address is on
+            a different <a href="#PAGE">Page</a></small></td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Branch iff P.V is CLEAR</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  if (P.V == 0) GOTO (PC+M) </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#FLG-V">oVerflow Flag (P.V)</A> gives full details on this flag,
+            including a comprehensive list of instructions which modify its value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            If a branch condition is false the <A href="#FLOW">Program Counter (PC)</A> is not affected and program execution
+            continues at the instruction immediately after the Branch instrucion.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="BVS">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>BVS</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Relative        BVS $A5        $70      2     2++ </font> </big></pre>
+        <table summary="" align="center">
+          <tr>
+            <td rowspan="2" valign="top"><b><font color="#FFFF00">++</font></b></td>
+            <td><small>Add 1 (one) T-State if a the branch occurs <i>and</i> the destination address is on
+                       the same <a href="#PAGE">Page</a></small></td>
+          </tr><tr>
+            <td><small>Add 2 (two) T-States if a the branch occurs <i>and</i> the destination address is on
+            a different <a href="#PAGE">Page</a></small></td>
+          </tr>
+        </table>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Branch iff P.V is SET</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  if (P.V == 1) GOTO (PC+M) </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#FLG-V">oVerflow Flag (P.V)</A> gives full details on this flag,
+            including a comprehensive list of instructions which modify its value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            If a branch condition is false the <A href="#FLOW">Program Counter (PC)</A> is not affected and program execution
+            continues at the instruction immediately after the Branch instrucion.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="CLC">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>CLC</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <x>Implied         CLC            $18      1     2    </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Clear Carry Flag (P.C)</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.C = 0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            For more information on P.C see:
+            <a href="#ADC">ADC</A>, <a href="#SBC">SBC</A> and <a href="#FLG-C">Carry Flag (P.C)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="CLD">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>CLD</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <x>Implied         CLD            $D8      1     2    </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Clear Decimal Flag (P.D)</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><b>D</b></A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>x</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.D = 0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When P.D is SET aritmetic instructions will operate as <a href="#BCD">Binary Codec Decimal (BCD)</A>
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When P.D is CLEAR aritmetic instructions will operate normally
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            For more information on P.D see:
+            <a href="#ADC">ADC</A>, <a href="#SBC">SBC</A> and <a href="#FLG-D">Decimal Flag (P.D)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="CLI">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>CLI</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <x>Implied         CLI            $58      1     2    </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Clear Interrupt (disable) Flag (P.I)</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><b>I</b></A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.I = 0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When P.I is SET signals from the hardware <A href="#INT">IRQ</A> pin will be IGNORED
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When P.I is CLEAR a signal from the hardware <A href="#INT">IRQ</A> pin will cause program execution to continue from the
+            <A href="#MEM_MAP">IRQ vector</A>, which is held little-endian at memory address #FFFE.  Full details of this vector
+            can be found in <a href="#MEM_MAP">Memroy Map</A>.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            For more information on P.I see:
+            <A href="#FLG-I">Interrupt (disable) Flag (P.I)</A>
+        </td>
+      </tr></table>
+    </tr></table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="CLV">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>CLV</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <x>Implied         CLV            $B8      1     2    </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Clear oVerflow Flag (P.V)</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><b>V</b></A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.V = 0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            There is NO instruction to SET the <A href="#FLG-V">oVerflow Flag (P.V)</A>
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <b>P.V serves TWO purposes!</b><br>
+            Arithmetic overflow and bit-6 from a <A href="#BIT">BIT</A> instruction.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            For more information on P.V see:
+            <A href="#FLG-V">oVerflow Flag (P.V)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="CMP">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>CMP</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       CMP #$A5       $C9      2     2   </font>
+  <font color="#FFFF00">Zero Page       CMP $A5        $C5      2     3   </font>
+  <font color="#FFFFFF">Zero Page,X     CMP $A5,X      $D5      2     4   </font>
+  <font color="#FFFF00">Absolute        CMP $A5B6      $CD      3     4   </font>
+  <font color="#FFFFFF">Absolute,X      CMP $A5B6,X    $DD      3     4+  </font>
+  <font color="#FFFF00">Absolute,Y      CMP $A5B6,Y    $D9      3     4+  </font>
+  <font color="#FFFFFF">(Indirect,X)    CMP ($A5,X)    $C1      2     6   </font>
+  <font color="#FFFF00">(Indirect),Y    CMP ($A5),Y    $D1      2     5+  </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Compare A with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  t = A - M
+  P.N = t.7
+  P.C = (A>=M) ? 1:0
+  P.Z = (t==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3">
+          <table summary="" border="0">
+          <tr><th colspan="4" align="left"><font color="#00FFFF">Notes:</font></th></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td valign="top" colspan="2">
+            A compare operation (CMP, <A href="#CPX">CPX</A> or <A href="#CPY">CPY</A>) is almost invariably followed by a <A href="#BRA">Conditional Branch</A>.
+          </td></tr>
+          <tr><td colspan="3">&nbsp;</td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td valign="top">
+<table summary="" bgcolor="#008800" border="1" cellpadding="5">
+  <tr align="center">
+    <td><pre>&nbsp;</pre></td> <td><pre>P.N</pre></td> <td><pre>P.C</pre></td> <td><pre>P.Z</pre></td>
+  </tr>
+  <tr align="center">
+    <td><pre>A < M</pre></td> <td><pre>1<font color="#FFFF00">*</font></pre></td> <td><pre>0</pre></td> <td><pre>0</pre></td>
+  </tr>
+  <tr align="center">
+    <td><pre>A = M</pre></td> <td><pre>0</pre></td> <td><pre>1</pre></td> <td><pre>1</pre></td>
+  </tr>
+  <tr align="center">
+    <td><pre>A > M</pre></td> <td><pre>0<font color="#FFFF00">*</font></pre></td> <td><pre>1</pre></td> <td><pre>0</pre></td>
+  </tr>
+</table>
+          </td><td valign="top">
+<table summary="" bgcolor="#008800" border="1">
+  <tr>
+    <td valign="top">&nbsp;</td>
+    <th align="center">Signed</th align="center">
+    <th align="center">Unsigned</th align="center">
+  </tr><tr>
+    <td valign="top"><pre><font color="#FFFFFF"> IF (r <  M)  GOTO lbl  </font></pre></td>
+    <td><pre><font color="#FFFFFF">  CMP  M<br>  BMI  lbl  </font></pre></td>
+    <td><pre><font color="#FFFFFF">  CMP  M<br>  BCC  lbl  </font></pre></td>
+  </tr><tr>
+    <td valign="top"><pre><font color="#FFFF00"> IF (r <= M)  GOTO lbl  </font></pre></td>
+    <td><pre><font color="#FFFF00">  CMP  M<br>  BMI  lbl<br>  BEQ  lbl </font></pre></td>
+    <td><pre><font color="#FFFF00">  CMP  M<br>  BCC  lbl<br>  BEQ  lbl </font></pre></td>
+  </tr><tr>
+    <td valign="top"><pre><font color="#FFFFFF"> IF (r == M)  GOTO lbl  </font></pre></td>
+    <td colspan="2"><pre><font color="#FFFFFF">         CMP  M<br>         BEQ  lbl  </font></pre></td>
+  </tr><tr>
+    <td valign="top"><pre><font color="#FFFF00"> IF (r != M)  GOTO lbl  </font></pre></td>
+    <td colspan="2"><pre><font color="#FFFF00">         CMP  M<br>         BNE  lbl  </font></pre></td>
+  </tr><tr>
+    <td valign="top"><pre><font color="#FFFFFF"> IF (r >= M)  GOTO lbl  </font></pre></td>
+    <td><pre><font color="#FFFFFF">  CMP  M<br>  BPL  lbl  </font></pre></td>
+    <td><pre><font color="#FFFFFF">  CMP  M<br>  BCS  lbl  </font></pre></td>
+  </tr><tr>
+    <td valign="top"><pre><font color="#FFFF00"> IF (r >  M)  GOTO lbl  </font></pre></td>
+    <td><pre><font color="#FFFF00">  CMP  M<br>  BEQ  +2<br>  BPL  lbl </font></pre></td>
+    <td><pre><font color="#FFFF00">  CMP  M<br>  BEQ  +2<br>  BCS  lbl </font></pre></td>
+  </tr>
+</table>
+      </td></tr>
+      <tr><td width="1%" valign="top">&nbsp;</td>
+      <td colspan="2">
+        <font color="#FFFF00">*</font>
+        Only valid when comparing signed numbers (in the range -128..127)
+      </td></tr>
+      <tr><td width="1%" valign="top">#&nbsp;</td>
+      <td colspan="2">
+        "r" is any one of the three primary registers {A, X, Y}<br>
+      </td></tr>
+      <tr><td width="1%" valign="top">#&nbsp;</td>
+      <td colspan="2">
+        If A the intended register, then the CMP instruction must be used (as shown above).<br>
+      </td></tr>
+      <tr><td width="1%" valign="top">#&nbsp;</td>
+      <td colspan="2">
+        If X or Y is intended register, then the <A href="#CPX">CPX</a> or <A href="#CPY">CPY</a>
+        instruction must be used
+        (in place of the CMP instructions shown in the table above).<br>
+      </td></tr>
+            </table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="CPX">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>CPX</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       CPX #$A5       $E0      2     2   </font>
+  <font color="#FFFF00">Zero Page       CPX $A5        $E4      2     3   </font>
+  <font color="#FFFFFF">Absolute        CPX $A5B6      $EC      3     4   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Compare X with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  t = X - M
+  P.N = t.7
+  P.C = (X>=M) ? 1:0
+  P.Z = (t==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            See <A href="#CMP">CMP</A> instruction for Flag Table and <A href="#BRA">Conditional Branch</A> coding structures
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="CPY">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>CPY</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       CPY #$A5       $C0      2     2   </font>
+  <font color="#FFFF00">Zero Page       CPY $A5        $C4      2     3   </font>
+  <font color="#FFFFFF">Absolute        CPY $A5B6      $CC      3     4   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Compare Y with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  t = Y - M
+  P.N = t.7
+  P.C = (Y>=M) ? 1:0
+  P.Z = (t==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            See <A href="#CMP">CMP</A> instruction for Flag Table and <A href="#BRA">Conditional Branch</A> coding structures
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="DEC">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>DEC</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Zero Page       DEC $A5        $C6      2     5   </font>
+  <font color="#FFFF00">Zero Page,X     DEC $A5,X      $D6      2     6   </font>
+  <font color="#FFFFFF">Absolute        DEC $A5B6      $CE      3     6   </font>
+  <font color="#FFFF00">Absolute,X      DEC $A5B6,X    $DE      3     7   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Decrement Memory by one</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  M = (M - 1) &amp; $FF
+  P.N = M.7
+  P.Z = (M==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            DEC does NOT affect the <a href="#FLG-C">Carry Flag (P.C)</A> or  <a href="#FLG-V">oVerflow Flag (P.V)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="DEX">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>DEX</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         DEX            $CA      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Decrement X by one</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  X = X - 1
+  P.Z = (X==0) ? 1:0
+  P.N = X.7          </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            DEX does NOT affect the <a href="#FLG-C">Carry Flag (P.C)</A> or  <a href="#FLG-V">oVerflow Flag (P.V)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="DEY">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>DEY</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         DEY            $88      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Decrement Y by one</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  Y = Y - 1
+  P.Z = (Y==0) ? 1:0
+  P.N = Y.7          </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            DEY does NOT affect the <a href="#FLG-C">Carry Flag (P.C)</A> or  <a href="#FLG-V">oVerflow Flag (P.V)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="EOR">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>EOR</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       EOR #$A5       $49      2     2   </font>
+  <font color="#FFFF00">Zero Page       EOR $A5        $45      2     3   </font>
+  <font color="#FFFFFF">Zero Page,X     EOR $A5,X      $55      2     4   </font>
+  <font color="#FFFF00">Absolute        EOR $A5B6      $4D      3     4   </font>
+  <font color="#FFFFFF">Absolute,X      EOR $A5B6,X    $5D      3     4+  </font>
+  <font color="#FFFF00">Absolute,Y      EOR $A5B6,Y    $59      3     4+  </font>
+  <font color="#FFFFFF">(Indirect,X)    EOR ($A5,X)    $41      2     6   </font>
+  <font color="#FFFF00">(Indirect),Y    EOR ($A5),Y    $51      2     5+  </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Bitwise-EXclusive-OR A with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  A = A ^ M
+  P.N = A.7
+  P.Z = (A==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            Known as XOR on most other platforms ...Either way, it is an EXclusive OR
+            ...one or the other, but not both.
+            </td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td><td></td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+<table summary=""><tr>
+  <td>
+    <table summary="" border="1" cellpadding="5">
+      <tr><td bgcolor="#008800"><pre>EOR</pre></td><td bgcolor="#008800"><pre> 0 </pre></td><td bgcolor="#008800"><pre> 1 </pre></td></tr>
+      <tr><td bgcolor="#008800"><pre> 0 </pre></td><td bgcolor="#008000"><pre> 0 </pre></td><td bgcolor="#008000"><pre> 1 </pre></td></tr>
+      <tr><td bgcolor="#008800"><pre> 1 </pre></td><td bgcolor="#008000"><pre> 1 </pre></td><td bgcolor="#008000"><pre> 0 </pre></td></tr>
+    </table>
+  </td>
+  <td width="10%"></td>
+  <td>
+    <table summary="" frame="box">
+      <tr>
+        <td><pre> 1 0 1 0 </pre></td>
+        <td rowspan="2"><pre>EOR </pre></td>
+      </tr>
+      <tr>
+        <td><pre> 1 1 0 0 </pre></td>
+      </tr>
+      <tr>
+        <td><pre>---------</pre></td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td><pre> 0 1 1 0 </pre></td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </td>
+</tr></table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="INC">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>INC</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Zero Page       INC $A5        $E6      2     5   </font>
+  <font color="#FFFF00">Zero Page,X     INC $A5,X      $F6      2     6   </font>
+  <font color="#FFFFFF">Absolute        INC $A5B6      $EE      3     6   </font>
+  <font color="#FFFF00">Absolute,X      INC $A5B6,X    $FE      3     7   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Increment Memory by one</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  M = (M + 1) &amp; $FF
+  P.N = M.7
+  P.Z = (M==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            INC does NOT affect the <a href="#FLG-C">Carry Flag (P.C)</A> or  <a href="#FLG-V">oVerflow Flag (P.V)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="INX">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>INX</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         INX            $E8      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Increment X by one</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  X = X + 1
+  P.Z = (X==0) ? 1:0
+  P.N = X.7          </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            INX does NOT affect the <a href="#FLG-C">Carry Flag (P.C)</A> or  <a href="#FLG-V">oVerflow Flag (P.V)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="INY">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>INY</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         INY            $C8      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Increment Y by one</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  Y = Y + 1
+  P.Z = (Y==0) ? 1:0
+  P.N = Y.7          </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            INY does NOT affect the <a href="#FLG-C">Carry Flag (P.C)</A> or  <a href="#FLG-V">oVerflow Flag (P.V)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="JMP">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>JMP</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Absolute        JMP $A5B6      $4C      3     3  </font>
+  <font color="#FFFF00">Indirect        JMP ($A5B6)    $6C      3     5  </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">GOTO Address</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  PC = M </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="JSR">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>JSR</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Absolute        JSR $A5B6      $20      3     6   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Jump to SubRoutine</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  t = PC - 1
+  bPoke(SP,t.h)
+  SP = SP - 1
+  bPoke(SP,t.l)
+  SP = SP - 1
+  PC = $A5B6    </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            The current <A href="#FLOW">Program Counter (PC)</A> minus one (PC-1) is PUSHed onto the <A href="#STACK">Stack</A>,
+            and then set to the specified value.
+          </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            A Subroutine is normally terminated with an <a href="#RTS">RTS</A> instruction.
+          </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="LDA">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>LDA</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       LDA #$A5       $A9      2     2   </font>
+  <font color="#FFFF00">Zero Page       LDA $A5        $A5      2     3   </font>
+  <font color="#FFFFFF">Zero Page,X     LDA $A5,X      $B5      2     4   </font>
+  <font color="#FFFF00">Absolute        LDA $A5B6      $AD      3     4   </font>
+  <font color="#FFFFFF">Absolute,X      LDA $A5B6,X    $BD      3     4+  </font>
+  <font color="#FFFF00">Absolute,Y      LDA $A5B6,Y    $B9      3     4+  </font>
+  <font color="#FFFFFF">(Indirect,X)    LDA ($A5,X)    $A1      2     6   </font>
+  <font color="#FFFF00">(Indirect),Y    LDA ($A5),Y    $B1      2     5+  </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Load A with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  A = M
+  P.N = A.7
+  P.Z = (A==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="LDX">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>LDX</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       LDX #$A5       $A2      2     2   </font>
+  <font color="#FFFF00">Zero Page       LDX $A5        $A6      2     3   </font>
+  <font color="#FFFFFF">Zero Page,Y     LDX $A5,Y      $B6      2     4   </font>
+  <font color="#FFFF00">Absolute        LDX $A5B6      $AE      2     4   </font>
+  <font color="#FFFFFF">Absolute,Y      LDX $A5B6,Y    $BE      2     4+  </font></big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Load X with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  X = M
+  P.N = X.7
+  P.Z = (X==0) ? 1:0</pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="LDY">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>LDY</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       LDY #$A5       $A0      2     2   </font>
+  <font color="#FFFF00">Zero Page       LDY $A5        $A4      2     3   </font>
+  <font color="#FFFFFF">Zero Page,X     LDY $A5,X      $B4      2     4   </font>
+  <font color="#FFFF00">Absolute        LDY $A5B6      $AC      2     4   </font>
+  <font color="#FFFFFF">Absolute,X      LDY $A5B6,X    $BC      2     4+  </font></big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Load Y with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  Y = M
+  P.N = Y.7
+  P.Z = (Y==0) ? 1:0</pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="LSR">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>LSR</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Accumulator     LSR A          $4A      1     2   </font>
+  <font color="#FFFF00">Zero Page       LSR $A5        $46      2     5   </font>
+  <font color="#FFFFFF">Zero Page,X     LSR $A5,X      $56      2     6   </font>
+  <font color="#FFFF00">Absolute        LSR $A5B6      $4E      3     6   </font>
+  <font color="#FFFFFF">Absolute,X      LSR $A5B6,X    $5E      3     7   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Logical Shift Right</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.N = 0
+  P.C = B.0
+  B = (B >> 1) &amp; $7F
+  P.Z = (B==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+<table summary="" frame="none">
+  <tr>
+    <td><table summary="" frame="box"><tr><td><small>0</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.7</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.6</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.5</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.4</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.3</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.2</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.1</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.0</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>P.C</small></td></tr></table></td>
+  </tr>
+  <tr><td colspan="19"></td></tr>
+  <tr><td colspan="19">
+    <table summary="" frame="none" align="center" bgcolor="#008800">
+      <tr>
+        <td>&nbsp;Before:</td>
+        <td><pre> B = <font color="#FFC0FF">1 1 1 0  1 1 1 0</font>   P.C = <font color="#FFC0FF">?</font> </pre></td>
+      </tr>
+      <tr>
+        <td>&nbsp;After:</td>
+        <td><pre> B = <font color="#FFC0FF">0 1 1 1  0 1 1 1</font>   P.C = <font color="#FFC0FF">0</font> </pre></td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="NOP">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>NOP</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         NOP            $EA      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">No OPeration</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  <i>~none~</i> </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            NOP achieves absolutely nothing.<br>
+            But when it is finished you are 1 T-State closer to your grave.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            NOP can be used to reserve space in a program for future code.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            Another frequent use of NOP is to patch out features of an existing program without
+            the need for a full recompile.<br>
+            ...The hackers favourite :)
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="ORA">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>ORA</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       ORA #$A5       $09      2     2   </font>
+  <font color="#FFFF00">Zero Page       ORA $A5        $05      2     2   </font>
+  <font color="#FFFFFF">Zero Page,X     ORA $A5,X      $15      2     3   </font>
+  <font color="#FFFF00">Absolute        ORA $A5B6      $0D      3     4   </font>
+  <font color="#FFFFFF">Absolute,X      ORA $A5B6,X    $1D      3     4+  </font>
+  <font color="#FFFF00">Absolute,Y      ORA $A5B6,Y    $19      3     4+  </font>
+  <font color="#FFFFFF">(Indirect,X)    ORA ($A5,X)    $01      2     6   </font>
+  <font color="#FFFF00">(Indirect),Y    ORA ($A5),Y    $11      2     5+  </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Bitwise-OR A with Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  A = A | M
+  P.N = A.7
+  P.Z = (A==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+<table summary=""><tr>
+  <td>
+    <table summary="" border="1" cellpadding="5">
+      <tr><td bgcolor="#008800"><pre>OR </pre></td><td bgcolor="#008800"><pre> 0 </pre></td><td bgcolor="#008800"><pre> 1 </pre></td></tr>
+      <tr><td bgcolor="#008800"><pre> 0 </pre></td><td bgcolor="#008000"><pre> 0 </pre></td><td bgcolor="#008000"><pre> 1 </pre></td></tr>
+      <tr><td bgcolor="#008800"><pre> 1 </pre></td><td bgcolor="#008000"><pre> 1 </pre></td><td bgcolor="#008000"><pre> 1 </pre></td></tr>
+    </table>
+  </td>
+  <td width="10%"></td>
+  <td>
+    <table summary="" frame="box">
+      <tr>
+        <td><pre> 1 0 1 0 </pre></td>
+        <td rowspan="2"><pre>OR </pre></td>
+      </tr>
+      <tr>
+        <td><pre> 1 1 0 0 </pre></td>
+      </tr>
+      <tr>
+        <td><pre>---------</pre></td>
+        <td>&nbsp;</td>
+      </tr>
+      <tr>
+        <td><pre> 1 1 1 0 </pre></td>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+  </td>
+</tr></table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="PHA">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>PHA</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         PHA            $48      1     3   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">PusH A onto Stack</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  bPoke(SP,A)
+  SP = SP - 1 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            You would be wise to take a little time to look at the notes for <A href="#JSR">JSR</A>
+            and <A href="#RTS">RTS</A> and work out why the following code will crash your program:
+            </td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+          <table summary=""><tr>
+          <td bgcolor="#800000"><pre>
+         JSR   Subr
+         ...
+         ...
+ Subr:   PHA
+         RTS           </pre>
+          </td></tr></table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="PHP">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>PHP</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         PHP            $08      1     3   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">PusH P onto Stack</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  bPoke(SP,P)
+  SP = SP - 1 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            A copy of the current <A href="#FLAGS">Processor Status Word (Flags)</A> is PUSHed onto the <A href="#STACK">Stack</A>.<br>
+            This can be useful if you wish to preserve the current <A href="#FLAGS">Flags</A> state while a
+            Subroutine is called.<br>
+            This system is utilised automatically by the processor during an <A href="#INT">Interrupt Subroutine</A>.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            You may later copy the <A href="#FLAGS">Flags</A> back to P with the <A href="#PLP">PLP</A> instruction.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            You would be wise to take a little time to look at the notes for <A href="#JSR">JSR</A>
+            and <A href="#RTS">RTS</A> and work out why the following code will crash your program:
+            </td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+          <table summary=""><tr>
+          <td bgcolor="#800000"><pre>
+         JSR   Subr
+         ...
+         ...
+ Subr:   PHP
+         RTS           </pre>
+          </td></tr></table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="PLA">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>PLA</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         PLA            $68      1     4   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">PulL from Stack to A</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  SP = SP + 1
+  A = bPeek(SP)
+  P.N = A.7
+  P.Z = (A==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            You would be wise to take a little time to look at the notes for <A href="#JSR">JSR</A>
+            and <A href="#RTS">RTS</A> and work out why the following code will crash your program:
+            </td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+          <table summary=""><tr>
+          <td bgcolor="#800000"><pre>
+         JSR   Subr
+         ...
+         ...
+ Subr:   PLA
+         RTS           </pre>
+          </td></tr></table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="PLP">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>PLP</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+	      <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+	      <font color="#FFFFFF">Implied         PLP            $28      1     4   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">PulL from Stack to P</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+              <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><b>V</b></A></td>
+              <td>-</td>
+              <td><a href="#FLG-B"><b>B</b></A></td>
+              <td><a href="#FLG-D"><b>D</b></A></td>
+              <td><a href="#FLG-I"><b>I</b></A></td>
+              <td><a href="#FLG-Z"><b>Z</b></A></td>
+              <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+	    <i>Logic:</i>
+	    SP = SP + 1
+	    P = bPeek(SP)  </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+            <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            The entry on the top of the <A href="#STACK">Stack</A> is placed in the <A href="#FLAGS">Processor Status Word (Flags)</A>.
+            </td></tr>
+            <tr><td width="1%" valign="top">#&nbsp;</td><td>
+		By definition this instruction can affect any or all <A href="#FLAGS">Flags</A> to known states.
+            </td></tr>
+            <tr><td width="1%" valign="top">#&nbsp;</td><td>
+		This instruction is normally only used to
+		<table summary=""><tr><td width="1%" valign="top">#&nbsp;</td><td>
+              Reverse a <A href="#PHA">PHA</A> instruction
+            </td></tr><tr><td>
+            <tr><td width="1%" valign="top">#&nbsp;</td><td>
+              Test for the <A href="#FLG-B">Break Flag (P.B)</A> during an <A href="#INT">Interrupt SubRoutine</A>.
+            </td></tr></table>
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            You would be wise to take a little time to look at the notes for <A href="#JSR">JSR</A>
+            and <A href="#RTS">RTS</A> and work out why the following code will crash your program:
+            </td></tr>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+          <table summary=""><tr>
+          <td bgcolor="#800000"><pre>
+         JSR   Subr
+         ...
+         ...
+ Subr:   PLA
+         RTS           </pre>
+          </td></tr></table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="ROL">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>ROL</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Accumulator     ROL A          $2A      1    2   </font>
+  <font color="#FFFF00">Zero Page       ROL $A5        $26      2    5   </font>
+  <font color="#FFFFFF">Zero Page,X     ROL $A5,X      $36      2    6   </font>
+  <font color="#FFFF00">Absolute        ROL $A5B6      $2E      3    6   </font>
+  <font color="#FFFFFF">Absolute,X      ROL $A5B6,X    $3E      3    7   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">ROtate Left</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  t = B.7
+  B = (B << 1) &amp; $FE
+  B = B | P.C
+  P.C = t
+  P.Z = (B==0) ? 1:0
+  P.N = B.7          </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+<table summary="" frame="none">
+  <tr>
+    <td><pre>,-<-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>P.C</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.7</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.6</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.5</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.4</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.3</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.2</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.1</small></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.0</small></td></tr></table></td> <td><pre>-<-.</pre></td>
+  </tr>
+  <tr>
+    <td><pre>`->-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="none"><tr><td><pre>-></pre></td></tr></table></td> <td><pre>->-'</pre></td>
+  </tr>
+  <tr><td colspan="19"></td></tr>
+  <tr><td colspan="19">
+    <table summary="" frame="none" align="center" bgcolor="#008800">
+      <tr>
+        <td>&nbsp;Before:</td>
+        <td><pre> P.C = <font color="#FFC0FF">1</font>   B = <font color="#FFC0FF">0 1 1 0  1 1 1 0</font> </pre></td>
+      </tr>
+      <tr>
+        <td>&nbsp;After:</td>
+        <td><pre> P.C = <font color="#FFC0FF">0</font>   B = <font color="#FFC0FF">1 1 0 1  1 1 0 1</font> </pre></td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="ROR">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>ROR</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Accumulator     ROR A          $6A      1     2   </font>
+  <font color="#FFFF00">Zero Page       ROR $A5        $66      2     5   </font>
+  <font color="#FFFFFF">Zero Page,X     ROR $A5,X      $76      2     6   </font>
+  <font color="#FFFF00">Absolute        ROR $A5B6      $6E      3     6   </font>
+  <font color="#FFFFFF">Absolute,X      ROR $A5B6,X    $7E      3     7   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">ROtate Right</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  t = B.0
+  B = (B >> 1) &amp; $7F
+  B = B | ((P.C) ? $80:$00)
+  P.C = t
+  P.Z = (B==0) ? 1:0
+  P.N = B.7                 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">&nbsp;</td><td>
+<table summary="" frame="none">
+  <tr>
+    <td><pre>,->-</pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.7</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.6</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.5</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.4</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.3</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.2</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.1</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>b.0</small></td></tr></table></td> <td><pre>-></pre></td>
+    <td><table summary="" frame="box"><tr><td><small>P.C</small></td></tr></table></td> <td><pre>->-.</pre></td>
+  </tr>
+  <tr>
+    <td><pre>`-<-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre><-</pre></td>
+    <td><table summary="" frame="none"><tr><td><pre><-</pre></td></tr></table></td> <td><pre>-<-'</pre></td>
+  </tr>
+  <tr><td colspan="19"></td></tr>
+  <tr><td colspan="19">
+    <table summary="" frame="none" align="center" bgcolor="#008800">
+      <tr>
+        <td>&nbsp;Before:</td>
+        <td><pre> B = <font color="#FFC0FF">0 1 1 0  1 1 1 0</font>   P.C = <font color="#FFC0FF">1</font> </pre></td>
+      </tr>
+      <tr>
+        <td>&nbsp;After:</td>
+        <td><pre> B = <font color="#FFC0FF">1 0 1 1  0 1 1 1</font>   P.C = <font color="#FFC0FF">0</font> </pre></td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="RTI">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>RTI</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         RTI            $40      1     6   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">ReTurn from Interrupt</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><b>V</b></A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><b>B</b></A></td>
+          <td><a href="#FLG-D"><b>D</b></A></td>
+          <td><a href="#FLG-I"><b>I</b></A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  SP = SP - 1
+  P = bPeek(SP)
+  SP = SP - 1
+  l = bPeek(SP)
+  SP = SP - 1
+  h = bPeek(SP)<<8
+  PC = h|l         </pre>
+      </td></tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            <A href="#INT">Interrupts</A> are normally triggered externally by hardware devices via
+            the <A href="#INT">IRQ</A> pin on the 6502 itself.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            Note that unlike <A href="#RTS">RTS</A>, RTI does NOT add one to the destination before
+            placing it in the <A href="#FLOW">Program Counter (PC)</A>
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            An <A href="#INT">Interrupt</A> may be simulated by a <A href="#BRK">BRK</A> instruction<br>
+            <font color="#FFFF00">**WARNING**</font>
+            Make sure you read up on <A href="#BRK">BRK</A> before using it - it's weird!
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="RTS">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>RTS</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         RTS            $60      1     6   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">ReTurn from Subroutine</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  SP = SP + 1
+  l = bPeek(SP)
+  SP = SP + 1
+  h = bPeek(SP)<<8
+  PC = (h|l) +1    </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            A word (16-bits) is PulLed from the top of the <A href="#STACK">Stack</A>; this value is then incremented
+            by one and placed in the <A href="#FLOW">Program Counter (PC)</A>.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            RTS is normally used to return from a Subroutine called by the <A href="#JSR">JSR</A>
+            instruction.<br>
+            This way they act as the classic "GOSUB" and "RETURN" statements.
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="SBC">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>SBC</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Immediate       SBC #$A5       $E9      2     2   </font>
+  <font color="#FFFF00">Zero Page       SBC $A5        $E5      2     3   </font>
+  <font color="#FFFFFF">Zero Page,X     SBC $A5,X      $F5      2     4   </font>
+  <font color="#FFFF00">Absolute        SBC $A5B6      $ED      3     4   </font>
+  <font color="#FFFFFF">Absolute,X      SBC $A5B6,X    $FD      3     4+  </font>
+  <font color="#FFFF00">Absolute,Y      SBC $A5B6,Y    $F9      3     4+  </font>
+  <font color="#FFFFFF">(Indirect,X)    SBC ($A5,X)    $E1      2     6   </font>
+  <font color="#FFFF00">(Indirect),Y    SBC ($A5),Y    $F1      2     5+  </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Subtract Memory from A with Borrow</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><b>V</b></A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  IF (P.D)
+    t = bcd(A) - bcd(M) - !P.C
+    P.V = (t>99 OR t<0) ? 1:0
+  ELSE
+    t = A - M - !P.C
+    P.V = (t>127 OR t<-128) ? 1:0
+  P.C = (t>=0) ? 1:0
+  P.N = t.7
+  P.Z = (t==0) ? 1:0
+  A = t &amp; 0xFF                    </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            There is no subtract-without-carry instruction!
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            As the result of SBC depends on the contents of the <a href="#FLG-C">Carry Flag (P.C)</A><br>
+            When performing "single precision" (or "8 bit") arithmetic it is often necessary to
+            ensure that the <a href="#FLG-C">Carry Flag (P.C)</A> is SET with an <a href="#SEC">SEC</A>
+            command before the subtraction is executed.<br>
+            The upshot of the <a href="#SEC">SEC</A>
+            is to ensure that the <a href="#FLG-C">Carry Flag (P.C)</A> has no bearing on the
+            result.
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            SETting the <a href="#FLG-C">Carry Flag (P.C)</A> with an <a href="#SEC">SEC</A> command is
+            normally necessary before the first stage of a "multiple precision" (or "more than 8 bit")
+            subtraction.
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            The action of SBC is dependant on the setting of <a href="#FLG-D">Decimal Flag (P.D)</A>
+          </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="SEC">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>SEC</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <x>Implied         SEC            $38      1     2    </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Set Carry flag (P.C)</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><b>C</b></A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.C = 1 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            For more information on P.C see:
+            <a href="#ADC">ADC</A>, <a href="#SBC">SBC</A> and <a href="#FLG-C">Carry Flag (P.C)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="SED">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>SED</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <x>Implied         CLD            $F8      1     2    </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Set Binary Coded Decimal Flag (P.D)</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><b>D</b></A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>x</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.D = 1 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When P.D is SET aritmetic instructions will operate as <a href="#BCD">Binary Codec Decimal (BCD)</A>
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When P.D is CLEAR aritmetic instructions will operate normally
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            For more information on P.D see:
+            <a href="#ADC">ADC</A>, <a href="#SBC">SBC</A> and <a href="#FLG-D">Decimal Flag (P.D)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="SEI">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>SEI</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <x>Implied         SEI            $78      1     2    </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Set Interrupt (disable) Flag (P.I)</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><b>I</b></A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  P.I = 1 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When P.I is SET signals from the <A href="#INT">hardware IRQ pin</A> will be IGNORED
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            When P.I is CLEAR a signal from the <A href="#INT">hardware IRQ pin</A> will cause program execution to continue from the
+            <A href="#MEM_MAP">IRQ vector</A>, which is held little-endian at memory address #FFFE.  Full details of this vector
+            can be found in <a href="#MEM_MAP">Memroy Map</A>.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            For more information on P.I see:
+            <A href="#FLG-I">Interrupt (disable) Flag (P.I)</A>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="STA">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>STA</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Zero Page       STA $A5        $85      2     3   </font>
+  <font color="#FFFF00">Zero Page,X     STA $A5,X      $95      2     4   </font>
+  <font color="#FFFFFF">Absolute        STA $A5B6      $8D      3     4   </font>
+  <font color="#FFFF00">Absolute,X      STA $A5B6,X    $9D      3     5   </font>
+  <font color="#FFFFFF">Absolute,Y      STA $A5B6,Y    $99      3     5   </font>
+  <font color="#FFFF00">(Indirect,X)    STA ($A5,X)    $81      2     6   </font>
+  <font color="#FFFFFF">(Indirect),Y    STA ($A5),Y    $91      2     6   </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Store A in Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  M = A </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="STX">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>STX</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Zero Page       STX $A5        $86      2     3   </font>
+  <font color="#FFFF00">Zero Page,Y     STX $A5,Y      $96      2     4   </font>
+  <font color="#FFFFFF">Absolute        STX $A5B6      $8E      3     4   </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Store X in Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  M = X  </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="STY">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>STY</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Zero Page       STY $A5        $84      2     3   </font>
+  <font color="#FFFF00">Zero Page,X     STY $A5,X      $94      2     4   </font>
+  <font color="#FFFFFF">Absolute        STY $A5B6      $8C      3     4   </font> </big></pre>
+        <center><b><font color="#FFFF00">+</font></b><small>&nbsp;&nbsp;Add 1 (one) T-State if a <a href="#PAGE">Page Boundary</a> is crossed</small></center><br>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Store Y in Memory</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  M = Y  </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="TAX">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>TAX</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         TAX            $AA      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Transfer A to X</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  X = A
+  P.N = X.7
+  P.Z = (X==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="TAY">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>TAY</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         TAY            $A8      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Transfer A to Y</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  Y = A
+  P.N = Y.7
+  P.Z = (Y==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="TSX">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>TSX</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         TSX            $BA      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Transfer Stack Pointer to X</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  X = SP
+  P.N = X.7
+  P.Z = (X==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            TSX is the only way to retrieve the current position of the <A href="#STACK">Stack Pointer</A>.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            The <A href="#STACK">Stack</A> can ONLY exist in Page 1 of memory (addresses $01'00..$01'FF)
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="TXA">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>TXA</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         TXA            $8A      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Transfer X to A</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  A = X
+  P.N = A.7
+  P.Z = (A==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="TXS">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>TXS</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         TXS            $9A      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Transfer X to Stack Pointer</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00"><s>Flags Affected</s>:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><x>n</A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><x>z</A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  SP = X </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            Although many instructions modify the value of the <A href="#STACK">Stack Pointer</A>,
+            TXS is the only way to set it to a specified value.
+            </td></tr>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            The <A href="#STACK">Stack</A> can ONLY exist in Page 1 of memory (addresses $01'00..$01'FF)<br>
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <a name="TYA">&nbsp;</A>
+    <table summary="" border="1" width="80%" align="center" bgcolor="#008000">
+      <tr>
+        <td width="30%" align="center" colspan="2" bgcolor="#4444FF"><big><big><b>TYA</b></big></big></td>
+        <td rowspan="4" valign="top"><pre><big>
+  <font color="#00FFFF"><u>Address Mode    Syntax        Opcode  I-Len  T-Cnt</u></font>&nbsp;&nbsp;<br>
+  <font color="#FFFFFF">Implied         TYA            $98      1     2   </font> </big></pre>
+        </td>
+      </tr>
+      <tr><td align="center" colspan="2">Transfer Y to A</td></tr>
+      <tr>
+        <td align="center"><font color="#FFFF00">Flags Affected:</font></td>
+        <td align="center"><table summary="" border="1"><tr>
+          <td><a href="#FLG-N"><b>N</b></A></td>
+          <td><a href="#FLG-V"><x>v</A></td>
+          <td>-</td>
+          <td><a href="#FLG-B"><x>b</A></td>
+          <td><a href="#FLG-D"><x>d</A></td>
+          <td><a href="#FLG-I"><x>i</A></td>
+          <td><a href="#FLG-Z"><b>Z</b></A></td>
+          <td><a href="#FLG-C"><x>c</A></td>
+        </tr></table></td>
+      </tr>
+      <tr><td colspan="2" valign="top" bgcolor="#800000"><pre>
+<i>Logic:</i>
+  A = Y
+  P.N = A.7
+  P.Z = (A==0) ? 1:0 </pre>
+      </td> </tr>
+      <tr>
+        <td colspan="3"><table summary="" border="0"><tr><th colspan="2" align="left"><font color="#00FFFF"><b>Notes:</b></font></th>
+          <tr><td width="1%" valign="top">#&nbsp;</td><td>
+            None
+            </td></tr></table>
+        </td>
+      </tr>
+    </table>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
