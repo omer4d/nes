@@ -31,9 +31,9 @@
    [:abs  14 6 false]
    [:absx 30 7 false]]}
  
- {:name "BCC", :op-type :r8, :modes [[:rel 144 2 true]]}
- {:name "BCS", :op-type :r8, :modes [[:rel 176 2 true]]}
- {:name "BEQ", :op-type :r8, :modes [[:rel 240 2 true]]}
+ {:name "BCC", :op-type :r8, :modes [[:rel 144 2 false]]}
+ {:name "BCS", :op-type :r8, :modes [[:rel 176 2 false]]}
+ {:name "BEQ", :op-type :r8, :modes [[:rel 240 2 false]]}
  
  {:name "BIT"
   :op-type :r8
@@ -41,12 +41,12 @@
   [[:zp  36  3 false]
    [:abs 44  4 false]]}
  
- {:name "BMI", :op-type :r8, :modes [[:rel 48  2 true]]}
- {:name "BNE", :op-type :r8, :modes [[:rel 208 2 true]]}
- {:name "BPL", :op-type :r8, :modes [[:rel 16  2 true]]}
+ {:name "BMI", :op-type :r8, :modes [[:rel 48  2 false]]}
+ {:name "BNE", :op-type :r8, :modes [[:rel 208 2 false]]}
+ {:name "BPL", :op-type :r8, :modes [[:rel 16  2 false]]}
  {:name "BRK", :op-type :na, :modes [[:imp 0   7 false]]}
- {:name "BVC", :op-type :r8, :modes [[:rel 80  2 true]]}
- {:name "BVS", :op-type :r8, :modes [[:rel 112 2 true]]}
+ {:name "BVC", :op-type :r8, :modes [[:rel 80  2 false]]}
+ {:name "BVS", :op-type :r8, :modes [[:rel 112 2 false]]}
  {:name "CLC", :op-type :na, :modes [[:imp 24  2 false]]}
  {:name "CLD", :op-type :na, :modes [[:imp 216 2 false]]}
  {:name "CLI", :op-type :na, :modes [[:imp 88  2 false]]}
