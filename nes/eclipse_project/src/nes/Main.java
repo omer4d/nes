@@ -1,6 +1,7 @@
 package nes;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class Main {	
 	static void printf(String fmt, Object... args)
@@ -10,41 +11,20 @@ public class Main {
 	
 	public static void main(String[] args) throws IOException
 	{
-		byte[] p1 = {1, 2, 3, 4};
+		InputStream in = Main.class.getResourceAsStream("/nestest.nes");
+		ROM rom = new ROM(in);
+		CPU cpu = new CPU(rom.prg);
+		CPU.DebugInfo info = new CPU.DebugInfo();
 		
-		byte[] p2 = {7, 8, 7, 8,
-					 7, 8, 7, 8,
-					 7, 8, 7, 8,
-					 7, 8, 7, 8};
+		cpu.pc = 0xC000;
+		cpu.flags = 0x24;
 		
-		byte[] p3 = {5, 6, 5, 6,
-					 5, 6, 5, 6,
-					 5, 6, 5, 6,
-					 5, 6, 5, 6,
-					 3, 4, 3, 4,
-					 3, 4, 3, 4,
-					 3, 4, 3, 4,
-					 3, 4, 3, 4};
-		
-		byte[] p4 = {9, 8, 9, 8,
-				 	 9, 8, 9, 8,
-				 	 9, 8, 9, 8,
-				 	 9, 8, 9, 8};
-		
-		MemoryIO[] chunks = {new MemoryIO(p1, 0, p1.length),
-							 new MemoryIO(p2, 0, p2.length),
-							 new MemoryIO(p3, 0, 16),
-							 new MemoryIO(p3, 16, 16),
-							 new MemoryIO(p4, 0, p4.length),
-							 new MemoryIO(p4, 0, p4.length)};
-		
-		for(int addr = 0; addr < chunks.length * 16; ++addr)
+		for(int i = 0; i < 100; ++i)
 		{
-			System.out.print(chunks[(addr >> 4)].read8(addr));
-			if(addr % 4 == 3)
-				System.out.println();
+			cpu.debugStep(info);
+			info.print();
 		}
 		
-		Main.class.getResourceAsStream("/nestest.nes").read();
+		//cpu.run(0xC000, 333);
 	}
 }

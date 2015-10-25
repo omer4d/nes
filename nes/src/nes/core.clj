@@ -255,27 +255,62 @@
     :r8 (str "readMemByte(" arg ")")
     (:w8 :rw8 :r16) arg))
 
-(doseq [instr-data instr-table
-        [mode code cycles penalty] (:modes instr-data)
-        :let [name (.toLowerCase (:name instr-data))
-              op-type (:op-type instr-data)]]
-  (do
-    (print "case" code ":\n")
-    
-    (case mode
-      :imm  (print name "(readMemByte(pc++));\n")
-      :acc  (print name "a();\n")
-      :imp  (print name "();\n")
-      :abs  (print name "(" (maybe-read op-type "absAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
-      :ind  (print name "(" (maybe-read op-type "indAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
-      :absx (print name "(" (maybe-read op-type (str "absxAddr(readMemByte(pc++), readMemByte(pc++), " penalty  ")")) ");\n")
-      :absy (print name "(" (maybe-read op-type (str "absyAddr(readMemByte(pc++), readMemByte(pc++), " penalty  ")")) ");\n")
-      :zp   (print name "(" (maybe-read op-type "readMemByte(pc++)") ");\n")
-      :zpx  (print name "(" (maybe-read op-type "zpxAddr(readMemByte(pc++))") ");\n")
-      :zpy  (print name "(" (maybe-read op-type "zpyAddr(readMemByte(pc++))") ");\n")
-      :indx (print name "(" (maybe-read op-type "indxAddr(readMemByte(pc++))") ");\n")
-      :indy (print name "(" (maybe-read op-type (str "indyAddr(readMemByte(pc++), " penalty ")")) ");\n")
-      :rel  (print name "(relAddr(readMemByte(pc++)));\n "))
-    
-    (print "cycles +=" cycles ";\n")
-    (print "break;\n")))
+(defn generate-case []
+  (doseq [instr-data instr-table
+          [mode code cycles penalty] (:modes instr-data)
+          :let [name (.toLowerCase (:name instr-data))
+                op-type (:op-type instr-data)]]
+    (do
+      (print "case" code ":\n")
+      
+      (case mode
+        :imm  (print name "(readMemByte(pc++));\n")
+        :acc  (print name "a();\n")
+        :imp  (print name "();\n")
+        :abs  (print name "(" (maybe-read op-type "absAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
+        :ind  (print name "(" (maybe-read op-type "indAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
+        :absx (print name "(" (maybe-read op-type (str "absxAddr(readMemByte(pc++), readMemByte(pc++), " penalty  ")")) ");\n")
+        :absy (print name "(" (maybe-read op-type (str "absyAddr(readMemByte(pc++), readMemByte(pc++), " penalty  ")")) ");\n")
+        :zp   (print name "(" (maybe-read op-type "readMemByte(pc++)") ");\n")
+        :zpx  (print name "(" (maybe-read op-type "zpxAddr(readMemByte(pc++))") ");\n")
+        :zpy  (print name "(" (maybe-read op-type "zpyAddr(readMemByte(pc++))") ");\n")
+        :indx (print name "(" (maybe-read op-type "indxAddr(readMemByte(pc++))") ");\n")
+        :indy (print name "(" (maybe-read op-type (str "indyAddr(readMemByte(pc++), " penalty ")")) ");\n")
+        :rel  (print name "(relAddr(readMemByte(pc++)));\n "))
+      
+      (print "cycles +=" cycles ";\n")
+      (print "break;\n"))))
+
+
+(defn debug-hex-to-int [s]
+  (read-string (str "0x" s)))
+
+(defn parse-debug-line [line]
+  (let [[pc mc asm a x y flags sp cyc]
+        ;;                  ----------_____--------------------_____----___________________________________----------_____ 
+        (rest (re-matches #"([^\s]{4})[\s]*((?:[^\s]{2} ){1,3})[\s]*(.*)A:(..) X:(..) Y:(..) P:(..) SP:(..) CPUC:(.+)[\s]*" line))]
+    {:pc pc
+     :mc (.trim mc)
+     :asm (.trim asm)
+     :a (debug-hex-to-int a)
+     :x (debug-hex-to-int x)
+     :y (debug-hex-to-int y)
+     :flags (debug-hex-to-int flags)
+     :sp (debug-hex-to-int sp)
+     :cyc (read-string cyc)}))
+
+(use 'clojure.java.io)
+(use 'clojure.pprint)
+
+(let [out (with-open [rdr (reader (clojure.java.io/resource "nestest-bus-cycles.log"))]
+            (doall (for [line (line-seq rdr)
+                         :when (nil? (re-matches #".*READ.*|.*WRITE.*" line))]
+                     (parse-debug-line line))))]
+  (pprint (take 100 out)))
+
+
+(let [rom (nes.ROM. (.openStream (clojure.java.io/resource "nestest.nes")))
+      cpu (nes.CPU. (.prg rom))
+      debug (nes.CPU$DebugInfo.)]
+  (.debugStep cpu debug)
+  (format "%X" (.pc debug)))
