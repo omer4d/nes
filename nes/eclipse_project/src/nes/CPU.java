@@ -14,7 +14,7 @@ public final class CPU {
 	
 	int acc, x, y, sp = 0xFF, flags;
 	int pc, cycles;
-	byte ram[] = new byte[0x10000];
+	byte[] ram = new byte[0x10000];
 	
 	static void verifyByte(int x)
 	{
@@ -86,12 +86,17 @@ public final class CPU {
 		return low | (high << 8);
 	}
 	
-	void branchHelper(int offs, boolean cond)
+	boolean samePage(int addr1, int addr2)
+	{
+		return (addr1 & 0xFF00) == (addr2 & 0xFF00);
+	}
+	
+	void branchHelper(int target, boolean cond)
 	{
 		if(cond)
 		{
-			cycles += (pc & 0xFF00) == ((pc + offs) & 0xFF00) ? 1 : 2;
-			pc += offs;
+			cycles += samePage(pc, target) ? 1 : 2;
+			pc = target;
 		}
 	}
 	
@@ -114,6 +119,13 @@ public final class CPU {
 		return makeShort(ram[addr] & 0xFF, ram[addr + 1] & 0xFF);
 	}
 	
+	int buggyReadMemShort(int addr) // Emulate 6502 page-crossing bug!
+	{
+		verifyShort(addr);
+		return makeShort(ram[addr] & 0xFF,
+				         ram[(addr & 0xFF00) | ((addr + 1) & 0x00FF)] & 0xFF);
+	}
+	
 	// ************************
 	// * Address Calculations *
 	// ************************
@@ -125,37 +137,47 @@ public final class CPU {
 	
 	int indAddr(int low, int high)
 	{
-		return readMemShort(makeShort(low, high));
+		return buggyReadMemShort(makeShort(low, high));
 	}
 	
-	int absxAddr(int low, int high)
+	int absxAddr(int low, int high, boolean penalty)
 	{
-		return makeShort(low, high) + x;
+		int addr1 = makeShort(low, high);
+		int addr2 = addr1 + x;		
+		cycles += penalty && samePage(addr1, addr2) ? 1 : 0;
+		return addr2;
 	}
 	
-	int absyAddr(int low, int high)
+	int absyAddr(int low, int high, boolean penalty)
 	{
-		return makeShort(low, high) + y;
+		int addr1 = makeShort(low, high);
+		int addr2 = addr1 + y;		
+		cycles += penalty && samePage(addr1, addr2) ? 1 : 0;
+		return addr2;
 	}
 	
 	int zpxAddr(int addr)
 	{
-		return addr + x;
+		return (addr + x) & 0xFF;
 	}
 	
 	int zpyAddr(int addr)
 	{
-		return addr + y;
+		return (addr + y) & 0xFF;
 	}
 	
-	int indxAddr(int lo, int hi)
+	int indxAddr(int addr)
 	{
-		return readMemShort(makeShort(lo, hi) + x);
+		return buggyReadMemShort((addr + x) & 0xFF);
 	}
 	
-	int indyAddr(int lo, int hi)
+	int indyAddr(int addr, boolean penalty)
 	{
-		return readMemShort(makeShort(lo, hi)) + y;
+		
+		int addr1 = buggyReadMemShort(addr);
+		int addr2 = addr1 + y;		
+		cycles += penalty && samePage(addr1, addr2) ? 1 : 0;
+		return addr2;
 	}
 	
 	int relAddr(int offs)
@@ -206,19 +228,19 @@ public final class CPU {
 		acc = v & 0xFF;
 	}
 	
-	void bcc(int offs)
+	void bcc(int target)
 	{
-		branchHelper(offs, !flagGet(CARRY_MASK));
+		branchHelper(target, !flagGet(CARRY_MASK));
 	}
 	
-	void bcs(int offs)
+	void bcs(int target)
 	{
-		branchHelper(offs, flagGet(CARRY_MASK));
+		branchHelper(target, flagGet(CARRY_MASK));
 	}
 	
-	void beq(int offs)
+	void beq(int target)
 	{
-		branchHelper(offs, flagGet(ZERO_MASK));
+		branchHelper(target, flagGet(ZERO_MASK));
 	}
 	
 	void bit(int src)
@@ -229,19 +251,19 @@ public final class CPU {
 		flagSet(ZERO_MASK, tmp == 0);
 	}
 	
-	void bmi(int offs)
+	void bmi(int target)
 	{
-		branchHelper(offs, flagGet(NEG_MASK));
+		branchHelper(target, flagGet(NEG_MASK));
 	}
 	
-	void bne(int offs)
+	void bne(int target)
 	{
-		branchHelper(offs, !flagGet(ZERO_MASK));
+		branchHelper(target, !flagGet(ZERO_MASK));
 	}
 	
-	void bpl(int offs)
+	void bpl(int target)
 	{
-		branchHelper(offs, !flagGet(NEG_MASK));
+		branchHelper(target, !flagGet(NEG_MASK));
 	}
 	
 	void brk()
@@ -254,14 +276,14 @@ public final class CPU {
 		pc = readMemShort(0xFFFE);
 	}
 	
-	void bvc(int offs)
+	void bvc(int target)
 	{
-		branchHelper(offs, !flagGet(OVERFLOW_MASK));
+		branchHelper(target, !flagGet(OVERFLOW_MASK));
 	}
 	
-	void bvs(int offs)
+	void bvs(int target)
 	{
-		branchHelper(offs, flagGet(OVERFLOW_MASK));
+		branchHelper(target, flagGet(OVERFLOW_MASK));
 	}
 	
 	void clc()
@@ -574,9 +596,9 @@ public final class CPU {
 	
 	public void run(int cycleNum)
 	{
-		while(cycles < cycleNum)
+		while (cycles < cycleNum)
 		{
-			switch(readMemByte(pc++))
+			switch (readMemByte(pc++))
 			{
 			case 105:
 				adc(readMemByte(pc++));
@@ -595,19 +617,19 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 125:
-				adc(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++))));
+				adc(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 121:
-				adc(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++))));
+				adc(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 97:
-				adc(readMemByte(indxAddr(readMemByte(pc++), readMemByte(pc++))));
+				adc(readMemByte(indxAddr(readMemByte(pc++))));
 				cycles += 6;
 				break;
 			case 113:
-				adc(readMemByte(indyAddr(readMemByte(pc++), readMemByte(pc++))));
+				adc(readMemByte(indyAddr(readMemByte(pc++), true)));
 				cycles += 5;
 				break;
 			case 41:
@@ -627,19 +649,19 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 61:
-				and(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++))));
+				and(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 57:
-				and(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++))));
+				and(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 33:
-				and(readMemByte(indxAddr(readMemByte(pc++), readMemByte(pc++))));
+				and(readMemByte(indxAddr(readMemByte(pc++))));
 				cycles += 6;
 				break;
 			case 49:
-				and(readMemByte(indyAddr(readMemByte(pc++), readMemByte(pc++))));
+				and(readMemByte(indyAddr(readMemByte(pc++), true)));
 				cycles += 5;
 				break;
 			case 10:
@@ -659,19 +681,19 @@ public final class CPU {
 				cycles += 6;
 				break;
 			case 30:
-				asl(absxAddr(readMemByte(pc++), readMemByte(pc++)));
+				asl(absxAddr(readMemByte(pc++), readMemByte(pc++), false));
 				cycles += 7;
 				break;
 			case 144:
-				bcc(readMemByte(relAddr(readMemByte(pc++))));
+				bcc(relAddr(readMemByte(pc++)));
 				cycles += 2;
 				break;
 			case 176:
-				bcs(readMemByte(relAddr(readMemByte(pc++))));
+				bcs(relAddr(readMemByte(pc++)));
 				cycles += 2;
 				break;
 			case 240:
-				beq(readMemByte(relAddr(readMemByte(pc++))));
+				beq(relAddr(readMemByte(pc++)));
 				cycles += 2;
 				break;
 			case 36:
@@ -683,15 +705,15 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 48:
-				bmi(readMemByte(relAddr(readMemByte(pc++))));
+				bmi(relAddr(readMemByte(pc++)));
 				cycles += 2;
 				break;
 			case 208:
-				bne(readMemByte(relAddr(readMemByte(pc++))));
+				bne(relAddr(readMemByte(pc++)));
 				cycles += 2;
 				break;
 			case 16:
-				bpl(readMemByte(relAddr(readMemByte(pc++))));
+				bpl(relAddr(readMemByte(pc++)));
 				cycles += 2;
 				break;
 			case 0:
@@ -699,11 +721,11 @@ public final class CPU {
 				cycles += 7;
 				break;
 			case 80:
-				bvc(readMemByte(relAddr(readMemByte(pc++))));
+				bvc(relAddr(readMemByte(pc++)));
 				cycles += 2;
 				break;
 			case 112:
-				bvs(readMemByte(relAddr(readMemByte(pc++))));
+				bvs(relAddr(readMemByte(pc++)));
 				cycles += 2;
 				break;
 			case 24:
@@ -739,19 +761,19 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 221:
-				cmp(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++))));
+				cmp(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 217:
-				cmp(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++))));
+				cmp(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 193:
-				cmp(readMemByte(indxAddr(readMemByte(pc++), readMemByte(pc++))));
+				cmp(readMemByte(indxAddr(readMemByte(pc++))));
 				cycles += 6;
 				break;
 			case 209:
-				cmp(readMemByte(indyAddr(readMemByte(pc++), readMemByte(pc++))));
+				cmp(readMemByte(indyAddr(readMemByte(pc++), true)));
 				cycles += 5;
 				break;
 			case 224:
@@ -791,7 +813,7 @@ public final class CPU {
 				cycles += 6;
 				break;
 			case 222:
-				dec(absxAddr(readMemByte(pc++), readMemByte(pc++)));
+				dec(absxAddr(readMemByte(pc++), readMemByte(pc++), false));
 				cycles += 7;
 				break;
 			case 202:
@@ -819,19 +841,19 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 93:
-				eor(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++))));
+				eor(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 89:
-				eor(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++))));
+				eor(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 65:
-				eor(readMemByte(indxAddr(readMemByte(pc++), readMemByte(pc++))));
+				eor(readMemByte(indxAddr(readMemByte(pc++))));
 				cycles += 6;
 				break;
 			case 81:
-				eor(readMemByte(indyAddr(readMemByte(pc++), readMemByte(pc++))));
+				eor(readMemByte(indyAddr(readMemByte(pc++), true)));
 				cycles += 5;
 				break;
 			case 230:
@@ -847,7 +869,7 @@ public final class CPU {
 				cycles += 6;
 				break;
 			case 254:
-				inc(absxAddr(readMemByte(pc++), readMemByte(pc++)));
+				inc(absxAddr(readMemByte(pc++), readMemByte(pc++), false));
 				cycles += 7;
 				break;
 			case 232:
@@ -887,19 +909,19 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 189:
-				lda(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++))));
+				lda(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 185:
-				lda(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++))));
+				lda(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 161:
-				lda(readMemByte(indxAddr(readMemByte(pc++), readMemByte(pc++))));
+				lda(readMemByte(indxAddr(readMemByte(pc++))));
 				cycles += 6;
 				break;
 			case 177:
-				lda(readMemByte(indyAddr(readMemByte(pc++), readMemByte(pc++))));
+				lda(readMemByte(indyAddr(readMemByte(pc++), true)));
 				cycles += 5;
 				break;
 			case 162:
@@ -919,7 +941,7 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 190:
-				ldx(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++))));
+				ldx(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 160:
@@ -939,7 +961,7 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 188:
-				ldy(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++))));
+				ldy(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 74:
@@ -959,7 +981,7 @@ public final class CPU {
 				cycles += 6;
 				break;
 			case 94:
-				lsr(absxAddr(readMemByte(pc++), readMemByte(pc++)));
+				lsr(absxAddr(readMemByte(pc++), readMemByte(pc++), false));
 				cycles += 7;
 				break;
 			case 234:
@@ -983,19 +1005,19 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 29:
-				ora(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++))));
+				ora(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 25:
-				ora(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++))));
+				ora(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 1:
-				ora(readMemByte(indxAddr(readMemByte(pc++), readMemByte(pc++))));
+				ora(readMemByte(indxAddr(readMemByte(pc++))));
 				cycles += 6;
 				break;
 			case 17:
-				ora(readMemByte(indyAddr(readMemByte(pc++), readMemByte(pc++))));
+				ora(readMemByte(indyAddr(readMemByte(pc++), true)));
 				cycles += 5;
 				break;
 			case 72:
@@ -1031,7 +1053,7 @@ public final class CPU {
 				cycles += 6;
 				break;
 			case 62:
-				rol(absxAddr(readMemByte(pc++), readMemByte(pc++)));
+				rol(absxAddr(readMemByte(pc++), readMemByte(pc++), false));
 				cycles += 7;
 				break;
 			case 106:
@@ -1051,7 +1073,7 @@ public final class CPU {
 				cycles += 6;
 				break;
 			case 126:
-				ror(absxAddr(readMemByte(pc++), readMemByte(pc++)));
+				ror(absxAddr(readMemByte(pc++), readMemByte(pc++), false));
 				cycles += 7;
 				break;
 			case 64:
@@ -1079,19 +1101,19 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 253:
-				sbc(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++))));
+				sbc(readMemByte(absxAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 249:
-				sbc(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++))));
+				sbc(readMemByte(absyAddr(readMemByte(pc++), readMemByte(pc++), true)));
 				cycles += 4;
 				break;
 			case 225:
-				sbc(readMemByte(indxAddr(readMemByte(pc++), readMemByte(pc++))));
+				sbc(readMemByte(indxAddr(readMemByte(pc++))));
 				cycles += 6;
 				break;
 			case 241:
-				sbc(readMemByte(indyAddr(readMemByte(pc++), readMemByte(pc++))));
+				sbc(readMemByte(indyAddr(readMemByte(pc++), true)));
 				cycles += 5;
 				break;
 			case 56:
@@ -1119,19 +1141,19 @@ public final class CPU {
 				cycles += 4;
 				break;
 			case 157:
-				sta(absxAddr(readMemByte(pc++), readMemByte(pc++)));
+				sta(absxAddr(readMemByte(pc++), readMemByte(pc++), false));
 				cycles += 5;
 				break;
 			case 153:
-				sta(absyAddr(readMemByte(pc++), readMemByte(pc++)));
+				sta(absyAddr(readMemByte(pc++), readMemByte(pc++), false));
 				cycles += 5;
 				break;
 			case 129:
-				sta(indxAddr(readMemByte(pc++), readMemByte(pc++)));
+				sta(indxAddr(readMemByte(pc++)));
 				cycles += 6;
 				break;
 			case 145:
-				sta(indyAddr(readMemByte(pc++), readMemByte(pc++)));
+				sta(indyAddr(readMemByte(pc++), false));
 				cycles += 6;
 				break;
 			case 134:
@@ -1182,6 +1204,7 @@ public final class CPU {
 				tya();
 				cycles += 2;
 				break;
+
 			default:
 				throw new RuntimeException("Illegal operation!");
 			}
