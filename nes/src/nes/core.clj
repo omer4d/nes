@@ -82,8 +82,8 @@
      [:abs 204 4 false]]}
    
    {:name "DEC"
-    :modes
     :op-type :rw8
+    :modes
     [[:zp   198 5 false]
      [:zpx  214 6 false]
      [:abs  206 6 false]
@@ -249,3 +249,33 @@
    {:name "TXA", :op-type :na, :modes [[:imp 138 2 false]]}
    {:name "TXS", :op-type :na, :modes [[:imp 154 2 false]]}
    {:name "TYA", :op-type :na, :modes [[:imp 152 2 false]]}])
+
+(defn maybe-read [op-type arg]
+  (case op-type
+    :r8 (str "readMemByte(" arg ")")
+    (:w8 :rw8 :r16) arg))
+
+(doseq [instr-data instr-table
+        [mode code cycles penalty] (:modes instr-data)
+        :let [name (.toLowerCase (:name instr-data))
+              op-type (:op-type instr-data)]]
+  (do
+    (print "case" code ":\n")
+    
+    (case mode
+      :imm  (print name "(readMemByte(pc++));\n")
+      :acc  (print name "a();\n")
+      :imp  (print name "();\n")
+      :abs  (print name "(" (maybe-read op-type "absAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
+      :ind  (print name "(" (maybe-read op-type "indAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
+      :absx (print name "(" (maybe-read op-type "absxAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
+      :absy (print name "(" (maybe-read op-type "absyAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
+      :zp   (print name "(" (maybe-read op-type "readMemByte(pc++)") ");\n")
+      :zpx  (print name "(" (maybe-read op-type "zpxAddr(readMemByte(pc++))") ");\n")
+      :zpy  (print name "(" (maybe-read op-type "zpyAddr(readMemByte(pc++))") ");\n")
+      :indx (print name "(" (maybe-read op-type "indxAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
+      :indy (print name "(" (maybe-read op-type "indyAddr(readMemByte(pc++), readMemByte(pc++))") ");\n")
+      :rel  (print name "(" (maybe-read op-type "relAddr(readMemByte(pc++))") ");\n"))
+    
+    (print "cycles +=" cycles ";\n")
+    (print "break;\n")))

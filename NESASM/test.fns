@@ -1,0 +1,8 @@
+; test.asm
+draw                             = $003D
+next                             = $0051
+done                             = $005D
+logo                             = $005D
+rleloop                          = $0032
+loop                             = $0027
+start                            = $000C
