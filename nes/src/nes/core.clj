@@ -1,4 +1,6 @@
 (ns nes.core)
+(use 'clojure.java.io)
+(use 'clojure.pprint)
 
 (def instr-table
   [{:name "ADC"
@@ -299,18 +301,66 @@
      :sp (debug-hex-to-int sp)
      :cyc (read-string cyc)}))
 
-(use 'clojure.java.io)
-(use 'clojure.pprint)
 
-(let [out (with-open [rdr (reader (clojure.java.io/resource "nestest-bus-cycles.log"))]
-            (doall (for [line (line-seq rdr)
-                         :when (nil? (re-matches #".*READ.*|.*WRITE.*" line))]
-                     (parse-debug-line line))))]
-  (pprint (take 100 out)))
+(defn build-debug-table []
+  (with-open [rdr (reader (clojure.java.io/resource "nestest-bus-cycles.log"))]
+    (doall (for [line (line-seq rdr)
+                 :when (nil? (re-matches #".*READ.*|.*WRITE.*" line))]
+             (parse-debug-line line)))))
 
+(def debug-table (build-debug-table))
+
+(defn debug-info->map [debug]
+  {:pc (format "%X" (.pc debug))
+   :mc (format "%02X %02X %02X" (.instr debug) (.byte1 debug) (.byte2 debug))
+   :a (.a debug)
+   :x (.x debug)
+   :y (.y debug)
+   :flags (.flags debug)
+   :sp (.sp debug)
+   :cyc (.cyc debug)})
+
+(defn debug-maps-equal? [a b] ; a is log
+  (and (= (:pc a) (:pc b))
+       (= (:mc a) (subs (:mc b) 0 (count (:mc a))))
+       (= (:a a) (:a b))
+       (= (:x a) (:x b))
+       (= (:y a) (:y b))
+       (= (:flags a)(:flags b))
+       (= (:sp a) (:sp b))
+       (= (:cyc a) (:cyc b))))
+
+(defn flags->str [flags]
+  (str (if (zero? (bit-and flags 128)) "-" "N")
+       (if (zero? (bit-and flags 64)) "-" "V")
+       (if (zero? (bit-and flags 32)) "-" "?")
+       (if (zero? (bit-and flags 16)) "-" "B")
+       (if (zero? (bit-and flags 8)) "-" "D")
+       (if (zero? (bit-and flags 4)) "-" "I")
+       (if (zero? (bit-and flags 2)) "-" "Z")
+       (if (zero? (bit-and flags 1)) "-" "C")))
+
+(defn print-debug-map [deb]
+  (println (format "%s   A=%03d, X=%03d, Y=%03d, SP=%03d, F=%s, CYC=%d"
+                   (:pc deb) (:a deb) (:x deb) (:y deb) (:sp deb) (flags->str (:flags deb)) (:cyc deb))))
 
 (let [rom (nes.ROM. (.openStream (clojure.java.io/resource "nestest.nes")))
       cpu (nes.CPU. (.prg rom))
       debug (nes.CPU$DebugInfo.)]
-  (.debugStep cpu debug)
-  (format "%X" (.pc debug)))
+  (set! (. cpu pc) 0xC000)
+  (set! (. cpu flags) 0x24)
+
+  (loop [i 0
+         n 200]
+    (.debugStep cpu debug)
+    (let [dm (debug-info->map debug)]
+      (if (and (< i n) (debug-maps-equal? (nth debug-table i) dm))
+        (recur (inc i) n)
+        (do (print (.stackDebug cpu))
+            (println (:asm (nth debug-table (dec i))))
+            (print-debug-map (nth debug-table i))
+            (print-debug-map dm))))))
+
+  ;(take-while (map vector
+   ;             (repeatedly (fn [] (.debugStep cpu debug) (debug-info->map debug)))
+   ;             debug-table)))

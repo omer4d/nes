@@ -17,22 +17,9 @@ public final class CPU {
 	
     static final int RESET_VEC_ADDR = 0xFFFC;
 	
-	int acc, x, y, sp = 0xFD, flags = ZERO_MASK | UNUSED_BIT_MASK;
-	int pc, cycles;
-	MemoryIO chunks[] = new MemoryIO[8];
-	
-	public static class DebugInfo {
-		public int pc, a, x, y, flags, sp;
-		public int instr, byte1, byte2;
-		public int cyc;
-		
-		public void print()
-		{
-			printf("%X  %02X %02X %02X   A:%02X X:%02X Y:%02X P:%02X SP:%02X CYC:%d\n",
-						pc, instr, byte1, byte2,
-						a, x, y, flags, sp, cyc);
-		}
-	};
+	public int acc, x, y, sp = 0xFD, flags = ZERO_MASK | UNUSED_BIT_MASK;
+	public int pc, cycles;
+	private MemoryIO chunks[] = new MemoryIO[8];
 	
 	public CPU(byte[] prg)
 	{
@@ -90,7 +77,7 @@ public final class CPU {
 	
 	int readMemByte(int addr)
 	{
-		verifyShort(addr);
+		addr &= 0xFFFF;
 		return chunks[chunkIdx(addr)].read(addr);
 	}
 	
@@ -148,7 +135,7 @@ public final class CPU {
 	int pop()
 	{
 		sp = (sp + 1) & 0xFF;
-		return readMemByte(STACK_LOWEST + sp);
+		return readMemByte(STACK_LOWEST + sp); 
 	}
 	
 	boolean flagGet(int mask)
@@ -208,7 +195,7 @@ public final class CPU {
 	{
 		int addr1 = makeShort(low, high);
 		int addr2 = addr1 + x;		
-		cycles += penalty && samePage(addr1, addr2) ? 1 : 0;
+		cycles += penalty && !samePage(addr1, addr2) ? 1 : 0;
 		return addr2;
 	}
 	
@@ -216,7 +203,7 @@ public final class CPU {
 	{
 		int addr1 = makeShort(low, high);
 		int addr2 = addr1 + y;		
-		cycles += penalty && samePage(addr1, addr2) ? 1 : 0;
+		cycles += penalty && !samePage(addr1, addr2) ? 1 : 0;
 		return addr2;
 	}
 	
@@ -240,7 +227,7 @@ public final class CPU {
 		
 		int addr1 = buggyReadMemShort(addr);
 		int addr2 = addr1 + y;		
-		cycles += penalty && samePage(addr1, addr2) ? 1 : 0;
+		cycles += penalty && !samePage(addr1, addr2) ? 1 : 0;
 		return addr2;
 	}
 	
@@ -261,10 +248,11 @@ public final class CPU {
 		
 		flagSet(CARRY_MASK, sum > 255);
 		flagSet(OVERFLOW_MASK, ((sum ^ acc) & (sum ^ src) & 128) != 0);
-		flagSet(NEG_MASK, isNeg(sum));
-		flagSet(ZERO_MASK, sum == 0);
 		
 		acc = sum & 0xFF;
+		
+		flagSet(NEG_MASK, isNeg(acc));
+		flagSet(ZERO_MASK, acc == 0);
 	}
 	
 	void and(int src)
@@ -278,18 +266,19 @@ public final class CPU {
 	{
 		int v = readMemByte(loc) << 1;
 		flagSet(CARRY_MASK, (v & 256) != 0);
+		v &= 0xFF;
 		flagSet(ZERO_MASK, v == 0);
 		flagSet(NEG_MASK, isNeg(v));
-		writeMemByte(loc, v & 0xFF);
+		writeMemByte(loc, v);
 	}
 	
 	void asla()
 	{
 		int v = acc << 1;
 		flagSet(CARRY_MASK, (v & 256) != 0);
-		flagSet(ZERO_MASK, v == 0);
-		flagSet(NEG_MASK, isNeg(v));
 		acc = v & 0xFF;
+		flagSet(ZERO_MASK, acc == 0);
+		flagSet(NEG_MASK, isNeg(acc));
 	}
 	
 	void bcc(int target)
@@ -357,6 +346,7 @@ public final class CPU {
 	
 	void cld()
 	{
+		flagOff(DECIMAL_MODE_MASK);
 	}
 	
 	void cli()
@@ -417,17 +407,17 @@ public final class CPU {
 	
 	void eor(int src)
 	{
-		acc &= src;
+		acc ^= src;
 		flagSet(ZERO_MASK, acc == 0);
 		flagSet(NEG_MASK, isNeg(acc));
 	}
 	
 	void inc(int loc)
 	{
-		int tmp = readMemByte(loc) + 1;
+		int tmp = (readMemByte(loc) + 1) & 0xFF;
 		flagSet(ZERO_MASK, tmp == 0);
 		flagSet(NEG_MASK, isNeg(tmp));
-		writeMemByte(loc, tmp & 0xFF);
+		writeMemByte(loc, tmp);
 	}
 	
 	void inx()
@@ -513,7 +503,7 @@ public final class CPU {
 	
 	void php()
 	{
-		push(flags);
+		push(flags | BRK_MASK);
 	}
 	
 	void pla()
@@ -525,7 +515,9 @@ public final class CPU {
 	
 	void plp()
 	{
-		flags = pop();
+		int oldFlags = flags;
+		flags = pop() | UNUSED_BIT_MASK;
+		flagSet(BRK_MASK, (oldFlags & BRK_MASK) != 0);
 	}
 	
 	void ror(int loc)
@@ -567,7 +559,7 @@ public final class CPU {
 	
 	void rti()
 	{
-		flags = pop();
+		flags = pop() | UNUSED_BIT_MASK;
 		pc = makeShort(pop(), pop());
 	}
 	
@@ -581,7 +573,7 @@ public final class CPU {
 		int diff = acc - src - (1 - carry());
 		
 		flagSet(CARRY_MASK, diff >= 0);
-		flagSet(OVERFLOW_MASK, ((src ^ acc) & (src ^ diff) & 128) != 0);
+		flagSet(OVERFLOW_MASK, ((acc ^ src) & (acc ^ diff) & 128) != 0);
 		flagSet(NEG_MASK, isNeg(diff));
 		flagSet(ZERO_MASK, diff == 0);
 		
@@ -595,7 +587,7 @@ public final class CPU {
 	
 	void sed()
 	{
-		
+		flagOn(DECIMAL_MODE_MASK);
 	}
 	
 	void sei()
@@ -676,8 +668,16 @@ public final class CPU {
 	// * Auto-generated step code: *
 	// *****************************
 	
+	public String stackDebug()
+	{
+		String out = "";
+		for(int i = 0; i < 256; ++i)
+			out += readMemByte(STACK_LOWEST + i) + ((sp == i) ? "*" : "") + "\n";
+		return out;
+	}
+	
 	public void debugStep(DebugInfo info)
-	{	
+	{
 		info.pc = pc;
 		info.a = acc;
 		info.x = x;
