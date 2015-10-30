@@ -3,6 +3,9 @@ package nes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+
+import engine.Window;
+
 import static nes.Util.printf;
 
 public class Main {	
@@ -70,6 +73,12 @@ public class Main {
 	
 	public static void main(String[] args) throws IOException
 	{
-		test1();
+		//InputStream in = Main.class.getResourceAsStream("/nestest.nes");
+		//ROM rom = new ROM(in);
+		
+		//test1();
+		
+        Window win = new Window();
+        win.open("Test", 512, 512, new GameScreen());
 	}
 }

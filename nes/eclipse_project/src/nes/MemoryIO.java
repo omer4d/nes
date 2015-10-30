@@ -6,16 +6,9 @@ public class MemoryIO {
 	private byte[] buffer;
 	private int start, len;
 	
-	private static boolean isPow2(int n)
-	{
-		int i = 1;
-		while(i < n) { i *= 2; }
-		return i == n;
-	}
-	
 	public MemoryIO(byte[] buffer, int start, int len)
 	{
-		if(!isPow2(len))
+		if(!Util.isPow2(len))
 			throw new RuntimeException("Non-pow2 MemoryIO buffer length: " + len);
 		
 		this.buffer = buffer;
