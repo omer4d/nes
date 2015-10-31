@@ -12,4 +12,16 @@ public class Util {
 		while(i < n) { i *= 2; }
 		return i == n;
 	}
+	
+	public static void verifyByte(int x)
+	{
+		if(x < 0 || x > 0xFF)
+			throw new IllegalArgumentException("Byte out of range: " + x);
+	}
+	
+	public static void verifyShort(int x)
+	{
+		if(x < 0 || x > 0xFFFF)
+			throw new IllegalArgumentException("Short out of range: " + x);
+	}
 }

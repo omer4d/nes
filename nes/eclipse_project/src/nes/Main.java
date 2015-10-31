@@ -17,7 +17,8 @@ public class Main {
 		
 		InputStream in = Main.class.getResourceAsStream("/nestest.nes");
 		ROM rom = new ROM(in);
-		CPU cpu = new CPU(rom.prg);
+		MemCPU mem = new MemCPU(rom.prg);
+		CPU cpu = new CPU(mem);
 		DebugInfo info = new DebugInfo();
 		
 		cpu.pc = 0xC000;
@@ -53,6 +54,8 @@ public class Main {
 		}
 		
 		System.out.println("Ended!");
+		
+		// Should reach C6BD
 	}
 	
 	/*
@@ -76,7 +79,7 @@ public class Main {
 		//InputStream in = Main.class.getResourceAsStream("/nestest.nes");
 		//ROM rom = new ROM(in);
 		
-		//test1();
+		test1();
 		
         Window win = new Window();
         win.open("Test", 512, 512, new GameScreen());

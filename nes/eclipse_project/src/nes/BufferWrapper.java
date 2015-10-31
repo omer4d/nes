@@ -1,12 +1,12 @@
 package nes;
 
-public class MemoryIO {
+public class BufferWrapper {
 	public static final int LOGICAL_CHUNK_LEN = 0x2000;
 	
 	private byte[] buffer;
 	private int start, len;
 	
-	public MemoryIO(byte[] buffer, int start, int len)
+	public BufferWrapper(byte[] buffer, int start, int len)
 	{
 		if(!Util.isPow2(len))
 			throw new RuntimeException("Non-pow2 MemoryIO buffer length: " + len);

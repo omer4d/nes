@@ -19,84 +19,40 @@ public final class CPU {
 	
 	public int acc, x, y, sp = 0xFD, flags = ZERO_MASK | UNUSED_BIT_MASK;
 	public int pc, cycles;
-	private MemoryIO chunks[] = new MemoryIO[8];
 	
-	public CPU(byte[] prg)
+	public MemCPU mem;
+	
+	public CPU(MemCPU mem)
 	{
-		chunks[0] = new MemoryIO(new byte[0x800], 0, 0x800);   // Work ram
-		chunks[1] = new MemoryIO(new byte[0x8], 0, 0x8); 	   // PPU regs
-		chunks[2] = new MemoryIO(new byte[0x2000], 0, 0x2000); // APU regs + cartridge exp
-		chunks[3] = new MemoryIO(new byte[0x2000], 0, 0x2000); // SRAM
-		
-		if(prg.length == 0x4000)
-		{
-			chunks[4] = new MemoryIO(prg, 0x0000, 0x2000);
-			chunks[5] = new MemoryIO(prg, 0x2000, 0x2000);
-			chunks[6] = new MemoryIO(prg, 0x0000, 0x2000);
-			chunks[7] = new MemoryIO(prg, 0x2000, 0x2000);
-		}
-		
-		else if(prg.length == 0x8000)
-		{
-			chunks[4] = new MemoryIO(prg, 0x0000, 0x2000);
-			chunks[5] = new MemoryIO(prg, 0x2000, 0x2000);
-			chunks[6] = new MemoryIO(prg, 0x4000, 0x2000);
-			chunks[7] = new MemoryIO(prg, 0x6000, 0x2000);
-		}
-		
-		else
-		{
-			throw new RuntimeException("Weird PRG ROM size: " + prg.length);
-		}
-		
-		pc = readMemShort(RESET_VEC_ADDR); 
+		this.mem = mem;
+		this.pc = readMemShort(RESET_VEC_ADDR); 
 		
 		printf("Stating execution at: %X\n", pc);
-	}
-	
-	static void verifyByte(int x)
-	{
-		if(x < 0 || x > 0xFF)
-			throw new IllegalArgumentException("Byte out of range: " + x);
-	}
-	
-	static void verifyShort(int x)
-	{
-		if(x < 0 || x > 0xFFFF)
-			throw new IllegalArgumentException("Short out of range: " + x);
 	}
 	
 	// ******************
 	// * Memory Helpers *
 	// ******************
 	
-	int chunkIdx(int addr)
-	{
-		return (addr >> 13);
-	}
-	
 	int readMemByte(int addr)
 	{
-		addr &= 0xFFFF;
-		return chunks[chunkIdx(addr)].read(addr);
+		return mem.read(addr);
 	}
 	
 	void writeMemByte(int addr, int b)
 	{
-		verifyShort(addr);
-		verifyByte(b);
-		chunks[chunkIdx(addr)].write(addr, b);
+		mem.write(addr, b);
 	}
 	
 	int readMemShort(int addr)
 	{
-		verifyShort(addr);
+		Util.verifyShort(addr);
 		return makeShort(readMemByte(addr), readMemByte(addr + 1));
 	}
 	
 	int buggyReadMemShort(int addr) // Emulate 6502 page-crossing bug!
 	{
-		verifyShort(addr);
+		Util.verifyShort(addr);
 		int addr2 = (addr & 0xFF00) | ((addr + 1) & 0x00FF);
 		return makeShort(readMemByte(addr), readMemByte(addr2));
 	}
@@ -127,7 +83,7 @@ public final class CPU {
 	
 	void push(int v)
 	{
-		verifyByte(v);
+		Util.verifyByte(v);
 		writeMemByte(STACK_LOWEST + sp, v);
 		sp = (sp - 1) & 0xFF;
 	}
