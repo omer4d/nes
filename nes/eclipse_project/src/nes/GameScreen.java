@@ -134,6 +134,6 @@ public class GameScreen extends WindowListenerAdapter {
 			glVertex2f(0, 512);
 		glEnd();
 		
-		System.out.println(win.getFps());
+		//System.out.println(win.getFps());
 	}
 }

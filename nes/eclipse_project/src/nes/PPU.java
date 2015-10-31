@@ -10,6 +10,7 @@ public class PPU {
 	byte[] oam = new byte[0xFF];
 	
 	int[] colors;
+	int[] zbuff = new int[256];
 	int scanline = 0;
 	
 	public PPU(int[] colors, byte[] chr)
@@ -37,8 +38,11 @@ public class PPU {
 		
 		int[] attrib = {0x00, 0x10, 0x50, 0x10, 0x00, 0x00, 0x00, 0x30};
 		
-		int[] pal = {0x22,0x29,0x1A,0x0F,  0x22,0x36,0x17,0x0F, 
-					 0x22,0x30,0x21,0x0F,  0x22,0x27,0x17,0x0F};
+		int[] pal = {0x22,0x29,0x1A,0x0F,  0x22,0x36,0x17,0x0F, // BG
+					 0x22,0x30,0x21,0x0F,  0x22,0x27,0x17,0x0F, 
+					 
+					 0x22,0x1C,0x15,0x14,  0x22,0x02,0x38,0x3C, // Sprites
+					 0x22,0x1C,0x15,0x14,  0x22,0x02,0x38,0x3C};
 		
 		// Copy nametable 0:
 		for(int i = 0; i < nt0.length; ++i)
@@ -51,6 +55,16 @@ public class PPU {
 		// Copy pal:
 		for(int i = 0; i < pal.length; ++i)
 			memChunk2[i] = (byte)pal[i];
+		
+		int[] sprites = {0x80, 0x32, 0x00, 0x80,   //sprite 0
+				   		 0x80, 0x33, 0x00, 0x88,   //sprite 1
+				   		 0x88, 0x34, 0x00, 0x80,   //sprite 2
+				   		 0x88, 0x35, 0x00, 0x88};   //sprite 3
+		
+		for(int i = 0; i < sprites.length; ++i)
+			oam[i] = (byte)sprites[i];
+		for(int i = sprites.length; i < oam.length; ++i)
+			oam[i] = (byte)0xFF; // Push unused sprites off the screen to get them clipped.
 	}
 	
 	public void renderScanline(Bitmap target)
@@ -58,7 +72,7 @@ public class PPU {
 		int tileRowStart = NAMETABLE_START + (scanline / 8) * 32;
 		int tileLine = scanline % 8;
 		
-		/*
+		
 		int pal[] = {Bitmap.makecol(64, 64, 64),
 				  Bitmap.makecol(255, 128, 128),
 				  Bitmap.makecol(128, 255, 128),
@@ -68,7 +82,7 @@ public class PPU {
 				  Bitmap.makecol(64, 128, 64),
 				  Bitmap.makecol(64, 64, 128),
 				  Bitmap.makecol(255, 255, 255)
-				  };*/
+				  };
 		
 		for(int x = 0; x < 256; ++x)
 		{
@@ -88,6 +102,36 @@ public class PPU {
 					  ((bpl2 & (1 << (7 - (x % 8))   )) == 0 ? 0 : 2);
 			
 			target.putpixel(x, scanline, colors[memChunk2[attr * 4 + col] & 0xFF]);
+			zbuff[x] = 0xFF;
+		}
+		
+		int spriteCounter = 0;
+		
+		for(int i = 0; i < oam.length / 4; ++i)
+		{
+			int spriteX = oam[i * 4 + 3] & 0xFF;
+			int spriteY = oam[i * 4] & 0xFF;
+			
+			if(scanline >= spriteY && scanline < spriteY + 8)
+			{
+				int tileIdx = oam[i * 4 + 1] & 0xFF;
+				int bpl1 = memChunk1[PATTERN_TABLE_START + 0x1000 + tileIdx * 16 + scanline - spriteY] & 0xFF;
+				int bpl2 = memChunk1[PATTERN_TABLE_START + 0x1000 + tileIdx * 16 + 8 + scanline - spriteY] & 0xFF;
+				int ps = oam[i * 4 + 2] & 3;
+				
+				for(int x = 0; x < 8; ++x)
+					if(spriteCounter < zbuff[spriteX + x])
+					{
+						int col = ((bpl1 & (1 << (7 - (x % 8))   )) == 0 ? 0 : 1) |
+								  ((bpl2 & (1 << (7 - (x % 8))   )) == 0 ? 0 : 2);
+						
+						if(col != 0)
+							target.putpixel(spriteX + x, scanline, colors[memChunk2[16 + ps * 4 + col] & 0xFF]);
+						zbuff[x] = spriteCounter;
+					}
+				
+				++spriteCounter;
+			}
 		}
 		
 		scanline = (scanline + 1) % 240;
